@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Date, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship #не совсем поняла как использовать
 
-from create_db import Base
+from database import Base
 
 
 class User(Base):
