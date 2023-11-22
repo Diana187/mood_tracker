@@ -1,3 +1,6 @@
 pip==23.3.1
 dash==2.14.1
 plotly==5.18.0
+pandas==2.1.2
+sqlalchemy==2.0.23
+faker==20.1.0
