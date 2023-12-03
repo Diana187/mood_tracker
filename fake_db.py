@@ -25,7 +25,6 @@ def setup_database():
     cur = conn.cursor()
 
     """Создаём таблицу 'fake_db.sqlite'."""
-    # TODO: add password
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
@@ -41,6 +40,23 @@ def setup_database():
             tag_id INTEGER PRIMARY KEY,
             tag TEXT NOT NULL
             );'''
+    )
+
+    tags = ['tag_1', 'tag_2', 'tag_3']
+
+    # insert_tags = """INSERT INTO tags (item_id, location_id, volume, price) VALUES (?, ?, ?, ?);"""
+    for tag in tags:
+        cur.execute(
+            '''INSERT INTO tags (tag) VALUES (?);''', (tag, )
+        )
+
+    """Create table 'moods'."""
+    cur.execute(
+    '''CREATE TABLE IF NOT EXISTS moods (
+        mood_id INTEGER PRIMARY KEY,
+        mood_name TEXT NOT NULL,
+        mood_rate INTEGER
+        );'''
     )
 
     conn.commit()
