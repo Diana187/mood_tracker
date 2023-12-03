@@ -30,9 +30,18 @@ def setup_database():
         '''CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
             username TEXT NOT NULL,
-            email TEXT
+            email TEXT,
+            password TEXT
             );'''
         )
+    
+    """Создаём таблицу 'tags'."""
+    cur.execute(
+        '''CREATE TABLE IF NOT EXISTS tags (
+            tag_id INTEGER PRIMARY KEY,
+            tag TEXT NOT NULL
+            );'''
+    )
 
     conn.commit()
     cur.close()
