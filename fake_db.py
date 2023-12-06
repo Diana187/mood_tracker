@@ -42,7 +42,11 @@ def setup_database():
             );'''
     )
 
-    tags = ['tag_1', 'tag_2', 'tag_3']
+    tags = [
+    'Walk', 'Good sleep', 'Psychologist',
+    'Meeting with friends', 'Sports', 'Reading a book',
+    'Bad sleep', 'Alcohol', 'Overeating'
+    ]
 
     # insert_tags = """INSERT INTO tags (item_id, location_id, volume, price) VALUES (?, ?, ?, ?);"""
     for tag in tags:
