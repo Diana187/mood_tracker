@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import random
 
 from sqlite3 import Error
 
@@ -8,7 +9,7 @@ import create_database as db_creator
 
 
 DATABASE_NAME = 'fake_db.sqlite'
-
+NUM_USERS = 5
 
 def create_connection():
     conn = None
@@ -32,6 +33,15 @@ def setup_database():
             email TEXT,
             password TEXT
             );'''
+    )
+    
+    lorem_ipsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum. Aliquam nonummy auctor massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla at risus. Quisque purus magna, auctor et, sagittis ac, posuere eu, lectus. Nam mattis, felis ut adipiscing.'
+    
+    lorem_ipsum_set  = set([i.strip(', .').capitalize() for i in lorem_ipsum.split(' ')])
+
+    for username in random.sample(list(lorem_ipsum_set), NUM_USERS):
+        cur.execute(
+            '''INSERT INTO users (username) VALUES (?);''', (username, )
         )
     
     """Creating table 'tags'."""
@@ -69,13 +79,6 @@ def setup_database():
         cur.execute(
             '''INSERT INTO moods (mood_name, mood_rate) VALUES (?, ?);''', (mood, rate, )
         )
-
-    # moods = ['excellent', 'good', 'normal', 'bad', 'terrible']
-
-    # for mood in moods:
-    #     cur.execute(
-    #         '''INSERT INTO moods (mood_name) VALUES (?);''', (mood, )
-    #     )
 
     conn.commit()
     cur.close()
