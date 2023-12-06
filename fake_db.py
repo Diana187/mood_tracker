@@ -43,9 +43,9 @@ def setup_database():
     )
 
     tags = [
-    'Walk', 'Good sleep', 'Psychologist',
-    'Meeting with friends', 'Sports', 'Reading a book',
-    'Bad sleep', 'Alcohol', 'Overeating'
+        'Walk', 'Good sleep', 'Psychologist',
+        'Meeting with friends', 'Sports', 'Reading a book',
+        'Bad sleep', 'Alcohol', 'Overeating'
     ]
 
     # insert_tags = """INSERT INTO tags (item_id, location_id, volume, price) VALUES (?, ?, ?, ?);"""
@@ -62,6 +62,20 @@ def setup_database():
         mood_rate INTEGER
         );'''
     )
+
+    mood_rate = {'excellent': 2, 'good': 1, 'normal': 0, 'bad': -1, 'terrible': -2}
+
+    for mood, rate in mood_rate.items():
+        cur.execute(
+            '''INSERT INTO moods (mood_name, mood_rate) VALUES (?, ?);''', (mood, rate, )
+        )
+
+    # moods = ['excellent', 'good', 'normal', 'bad', 'terrible']
+
+    # for mood in moods:
+    #     cur.execute(
+    #         '''INSERT INTO moods (mood_name) VALUES (?);''', (mood, )
+    #     )
 
     conn.commit()
     cur.close()
