@@ -12,9 +12,10 @@ def create_database(load_fake_data: bool = True):
 
 def _load_fake_data(session: Session):
     predefined_tags = [
-        'Прогулка', 'Хороший сон', 'Сессия с психологом',
-        'Встреча с друзьями', 'Спорт', 'Чтение'
-        ]
+    'Walk', 'Good sleep', 'Psychologist',
+    'Meeting with friends', 'Sports', 'Reading a book',
+    'Bad sleep', 'Alcohol', 'Overeating'
+    ]
 
 # где-то будет
 fake = Faker()

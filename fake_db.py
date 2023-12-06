@@ -20,11 +20,11 @@ def create_connection():
     return conn
 
 def setup_database():
-    """Создаём соединение и курсор."""
+    """Creating a connection and a cursor."""
     conn = sqlite3.connect(DATABASE_NAME)
     cur = conn.cursor()
 
-    """Создаём таблицу 'fake_db.sqlite'."""
+    """Creating table 'fake_db.sqlite'."""
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
@@ -34,7 +34,7 @@ def setup_database():
             );'''
         )
     
-    """Создаём таблицу 'tags'."""
+    """Creating table 'tags'."""
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS tags (
             tag_id INTEGER PRIMARY KEY,
@@ -54,7 +54,7 @@ def setup_database():
             '''INSERT INTO tags (tag) VALUES (?);''', (tag, )
         )
 
-    """Create table 'moods'."""
+    """Creating table 'moods'."""
     cur.execute(
     '''CREATE TABLE IF NOT EXISTS moods (
         mood_id INTEGER PRIMARY KEY,

@@ -1,11 +1,11 @@
+## Description
 
-## Описание
-"MoodTrack" – приложение для отслеживания настроения и его связи с деятельностью. Оно помогает пользователю следить за своим эмоциональным состоянием и понимать, как различные действия и мероприятия влияют на их настроение. Приложение "MoodTrack" помогает пользователям более осознанно управлять своим настроением и лучше понимать, что влияет на их эмоциональное состояние.
+"MoodTrack" is an application for tracking mood and its correlation with activities. It helps users monitor their emotional state and understand how various actions and events influence their mood. The "MoodTrack" app assists users in more consciously managing their mood and gaining a better understanding of what affects their emotional well-being.
 
-1. Отслеживание настроения. Пользователь может отмечать настроение в течение дня. Раз в день в предустановленное время пользователь отвечает на вопрос о своем настроении. 
+Mood Tracking: Users can mark their mood throughout the day. Once a day at a predetermined time, the user responds to a question about their mood.
 
-2. Связь с деятельностью. Вместе с отметкой о настроении можно дополнительно отметить, чем занимался пользователь в этот день: различные действия, события, мероприятия. Такие как прогулка, хороший сон, сессия с психологом, встреча с друзьями, спорт, чтение книги. (Можно ли, чтобы пользователь сам создавал виды деятельности для отметок?) 
+Connection with Activities: Along with the mood entry, users can additionally note what activities they engaged in on that day. These can include various actions, events, or activities such as a walk, good sleep, a session with a psychologist, meeting friends, sports, reading a book.
 
-3. Связь настроения и деятельности, анализ. Приложение предоставляет пользователям статистические данные о том, какие виды деятельности, события или действия обычно влияют на их настроение. Это может быть визуализировано в виде графиков или диаграмм.
+Correlation of Mood and Activities, Analysis: The app provides users with statistical data on which types of activities, events, or actions typically influence their mood. This can be visualized through graphs or charts.
 
-4. Рекомендации? На основе данных о настроении и деятельности приложение может предлагать пользователю рекомендации по улучшению настроения. Например, если приложение замечает, что после встречи с друзьями настроение обычно улучшается, оно может посоветовать увеличить количество таких встреч.
+Recommendations: Based on mood and activity data, the app may offer users recommendations to improve their mood. For example, if the app notices that mood usually improves after meeting friends, it may suggest increasing the frequency of such gatherings.

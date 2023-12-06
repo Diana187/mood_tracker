@@ -5,15 +5,15 @@ from sqlalchemy.orm import sessionmaker
 
 DATABASE_NAME = 'mood_tracker.sqlite'
 
-"""Создаём базу данных"""
+"""Creating database."""
 engine = create_engine(f'sqlite:///{DATABASE_NAME}')
 Session = sessionmaker(bind=engine)
 
-"""Класс, от которого наследуются классы с таблицами"""
+"""The class from which classes with tables inherit."""
 Base = declarative_base()
 
 
-"""Функция для создания БД"""
+"""Function for creating a database."""
 # почему именно функция?
 def create_db():
     Base.metadata.create_all(engine)
