@@ -1,6 +1,8 @@
 import os
 import sqlite3
 import random
+from datetime import datetime, timedelta
+from faker import Faker
 
 from sqlite3 import Error
 
@@ -10,6 +12,7 @@ import create_database as db_creator
 
 DATABASE_NAME = 'fake_db.sqlite'
 NUM_USERS = 5
+NUMBER_OF_RECORDS = 10
 
 def create_connection():
     conn = None
@@ -94,12 +97,34 @@ def setup_database():
             );'''
     )
 
-    for record in range(10):
+    fake = Faker()
+
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=90)
+
+    for _ in range(NUMBER_OF_RECORDS):
         user_id = random.randint(1, 43)
         mood_id = random.randint(1, 5)
+        record_date = fake.date_time_between(start_date=start_date, end_date=end_date, )
         cur.execute(
-            '''INSERT INTO records (user_id, mood_id) VALUES (?, ?);''', (user_id, mood_id, )
+            '''INSERT INTO records (user_id, mood_id, record_date) VALUES (?, ?, ?);''', (user_id, mood_id, record_date, )
         )
+
+    # record_dates = [
+    #     fake.date_time_between(start_date=start_date, end_date=end_date, )
+    #     for _ in range(7)
+    # ]
+
+    # for record_date in record_dates:
+    #     cur.execute(
+    #         '''INSERT INTO records (record_date) VALUES (?);''', (record_date, )
+    #     )
+
+    # record_date = [
+    #     fake.date_time_between(start_date=party.start_dt, end_date=party.end_dt, )
+    #     for _ in range(item_loc_user_dt.shape[0])
+    # ]
+    # fake.date_time_between(start_date=party.start_dt, end_date=party.end_dt )
 
     # заполнять: рандомный int из диапозона от 1 до количества user (43), mood (5)
     # границы диапозона тоже должны входить 
@@ -115,10 +140,6 @@ def setup_database():
             FOREIGN KEY (tag_id) REFERENCES tags(tag_id)
             );'''
     )
-
-    # NUMBER_OF_RECORDS; 
-
-
 
     conn.commit()
     cur.close()
