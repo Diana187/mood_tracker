@@ -42,6 +42,9 @@ def setup_database():
     
     lorem_ipsum_set  = set([i.strip(', .').capitalize() for i in lorem_ipsum.split(' ')])
 
+    # использовать фэйкер для генерации юзернеймов, имейлов
+    # посмотреть, чтобы значения были уникальными
+
     for username in random.sample(list(lorem_ipsum_set), NUM_USERS):
         cur.execute(
             '''INSERT INTO users (username) VALUES (?);''', (username, )
@@ -103,32 +106,12 @@ def setup_database():
     start_date = end_date - timedelta(days=90)
 
     for _ in range(NUMBER_OF_RECORDS):
-        user_id = random.randint(1, 43)
-        mood_id = random.randint(1, 5)
-        record_date = fake.date_time_between(start_date=start_date, end_date=end_date, )
+        user_id = random.randint(1, len(lorem_ipsum_set))
+        mood_id = random.randint(1, len(mood_rate))
+        record_date = fake.date_time_between(start_date=start_date, end_date=end_date,  ).strftime('%Y-%m-%d %H:%M:%S')
         cur.execute(
             '''INSERT INTO records (user_id, mood_id, record_date) VALUES (?, ?, ?);''', (user_id, mood_id, record_date, )
         )
-
-    # record_dates = [
-    #     fake.date_time_between(start_date=start_date, end_date=end_date, )
-    #     for _ in range(7)
-    # ]
-
-    # for record_date in record_dates:
-    #     cur.execute(
-    #         '''INSERT INTO records (record_date) VALUES (?);''', (record_date, )
-    #     )
-
-    # record_date = [
-    #     fake.date_time_between(start_date=party.start_dt, end_date=party.end_dt, )
-    #     for _ in range(item_loc_user_dt.shape[0])
-    # ]
-    # fake.date_time_between(start_date=party.start_dt, end_date=party.end_dt )
-
-    # заполнять: рандомный int из диапозона от 1 до количества user (43), mood (5)
-    # границы диапозона тоже должны входить 
-    # заполнить record_date рандомный таймстамп из диапозона (смотри тг)
 
     """Creating table 'records_to_tags'."""
     cur.execute(
