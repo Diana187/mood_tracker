@@ -44,19 +44,21 @@ df = df_for_chart(count=1000)
 
 app = Dash(__name__)
 
-
+# добавить поле для ввода
+# сложить лэйаут в внешний контейнер
+# добавить кнопку (см ноушен, инпут для количества юзеров)
+# оба дропдауна сложить в одну строчку: слева и справа, чтобы делили экран на пополам;
+# сложить в dbc.row, объявляю две колонки и в каждой колонце по дропдауну
+# посмотреть доку, чтобы задать ширину
+# добавить простой стиль
 app.layout = html.Div([
     html.H1(children='Title of Dash App', style={'textAlign':'center'}),
     dcc.Dropdown(df.tags.unique(), df.tags.unique(), id='dropdown-selection', multi=True),
     dcc.Dropdown(df.names.unique(), df.names.unique()[0], id='dropdown-selection_name'),
     dcc.Graph(id='graph-content')
 ])
-# посмотреть на кор компоненты (в телеграм) и https://dash.plotly.com/dash-html-components
-# https://plotly.com/examples/ 
-# https://community.plotly.com/t/holiday-community-app-building-challenge/70393/4?_gl=1*1yqa3g6*_ga*NDU4NDk4MjQ0LjE3MDIzMjMyOTc.*_ga_6G7EE0JNSC*MTcwMzEwNTkyNy40LjEuMTcwMzEwNjAwOS40Ni4wLjA
-# склонировать репозиторий, посмотреть, что будет, если я удалю лэйаут или меняю:
-# узнать, как оно ломается и какие компоненты что дают
 
+# добавить инпут
 @callback(
     Output('graph-content', 'figure'),
     [Input('dropdown-selection', 'value'),
@@ -64,12 +66,10 @@ app.layout = html.Div([
     prevent_initial_call=True
 )
 
-# на 1 таймстамп должен быть 1 человек
-
-# посмотреть ссылку на стаковерфлоу и исправить функцию (передавали строку, а теперь список)
-# https://stackoverflow.com/questions/12096252/use-a-list-of-values-to-select-rows-from-a-pandas-dataframe
-def update_graph(selected_tag, selected_name):
-    dff = df[(df.tags == selected_tag) & (df.names == selected_name)]
+def update_graph(selected_tags, selected_name):
+    # dff = df[df.tags.isin(selected_tags) & df.names.isin(selected_names)]
+    dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
+    # dff = df[(df.tags == selected_tag) & (df.names == selected_name)]
     return px.line(dff, x='times', y='moods')
 
 if __name__ == '__main__':
