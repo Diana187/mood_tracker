@@ -47,6 +47,7 @@ app = Dash(__name__)
 # добавить поле для ввода
 # сложить лэйаут в внешний контейнер
 # добавить кнопку (см ноушен, инпут для количества юзеров)
+
 # оба дропдауна сложить в одну строчку: слева и справа, чтобы делили экран на пополам;
 # сложить в dbc.row, объявляю две колонки и в каждой колонце по дропдауну
 # посмотреть доку, чтобы задать ширину
@@ -66,6 +67,7 @@ app.layout = html.Div([
     prevent_initial_call=True
 )
 
+# добавить ещё один аргумент
 def update_graph(selected_tags, selected_name):
     # dff = df[df.tags.isin(selected_tags) & df.names.isin(selected_names)]
     dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
