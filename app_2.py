@@ -20,7 +20,7 @@ def df_for_chart(num_users=10, count=100):
     times = [
         faker.date_time_between(start_date=dt(2020, 10, 1, 12, 0, 0),
                                 end_date=dt.now(),).strftime('%Y-%m-%d %H:%M:%S') for _ in range(count)
-        ]
+    ]
     d = {
         'names': random.choices(users, k=count),
         'moods': random.choices(list(range(-2, 3)), k=count),
@@ -86,7 +86,6 @@ app.layout = dbc.Container([
         # ],
         # width={'size': 6, 'order': 2}),
     ]),
-
     dbc.Row([
         dbc.Col([
             dcc.Input(
@@ -122,17 +121,16 @@ app.layout = dbc.Container([
 
 def update_graph(selected_tags, selected_name, record_count):
 
-    # ctx = callback_context
-    # button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    ctx = callback_context
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    # if button_id == 'input_count':
-    #     df = df_for_chart(count=record_count)
-    # else:
-    #     dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
-    #     # ????
+    if button_id == 'input_count':
+        df = df_for_chart(count=record_count)
+    else:
+        dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
 
-    df = df_for_chart(count=record_count)
-    dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
+    # df = df_for_chart(count=record_count)
+    # dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
     
     # dff = df[df.tags.isin(selected_tags) & df.names.isin(selected_names)]
     # dff = df[(df.tags == selected_tag) & (df.names == selected_name)]

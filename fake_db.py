@@ -2,12 +2,17 @@ import os
 import sqlite3
 import random
 from datetime import datetime, timedelta
-from faker import Faker
 
 from sqlite3 import Error
 
 from database import DATABASE_NAME
 import create_database as db_creator
+
+import pandas as pd
+import random
+from faker import Faker
+
+faker = Faker()
 
 
 DATABASE_NAME = 'fake_db.sqlite'
@@ -38,17 +43,27 @@ def setup_database():
             );'''
     )
 
-    lorem_ipsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum. Aliquam nonummy auctor massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla at risus. Quisque purus magna, auctor et, sagittis ac, posuere eu, lectus. Nam mattis, felis ut adipiscing.'
+    # lorem_ipsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum. Aliquam nonummy auctor massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla at risus. Quisque purus magna, auctor et, sagittis ac, posuere eu, lectus. Nam mattis, felis ut adipiscing.'
+    # lorem_ipsum_set  = set([i.strip(', .').capitalize() for i in lorem_ipsum.split(' ')])
     
-    lorem_ipsum_set  = set([i.strip(', .').capitalize() for i in lorem_ipsum.split(' ')])
+    users = [f"{faker.first_name()} {faker.last_name()}" for _ in range(NUM_USERS)]
+    # пусть также генерируются имейлы и пароли; если не получится с паролями, то взять лорем ипсум
+    # посмотреть, умеет ли фейкер делать имейлы
+    # юзернеймы (вместо лорем ипсум сет), имейлы и пароли делаем тут через фейкер
+
+    for username in users:
+        cur.execute(
+        '''INSERT INTO users (username) VALUES (?);''', (username, )
+        )
+
+        # emails = [f"{user.replace('.', '')}@example.com" for user in users]
+
+
+
 
     # использовать фэйкер для генерации юзернеймов, имейлов
+    # взять из функции df_for_chart генерацию юзернеймов, добавить имейлы
     # посмотреть, чтобы значения были уникальными
-
-    for username in random.sample(list(lorem_ipsum_set), NUM_USERS):
-        cur.execute(
-            '''INSERT INTO users (username) VALUES (?);''', (username, )
-        )
     
     """Creating table 'tags'."""
     cur.execute(
@@ -106,7 +121,7 @@ def setup_database():
     start_date = end_date - timedelta(days=90)
 
     for _ in range(NUMBER_OF_RECORDS):
-        user_id = random.randint(1, len(lorem_ipsum_set))
+        user_id = random.randint(1, NUM_USERS)
         mood_id = random.randint(1, len(mood_rate))
         record_date = fake.date_time_between(start_date=start_date, end_date=end_date,  ).strftime('%Y-%m-%d %H:%M:%S')
         cur.execute(
