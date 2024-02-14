@@ -46,24 +46,25 @@ def setup_database():
     # lorem_ipsum = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum. Aliquam nonummy auctor massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla at risus. Quisque purus magna, auctor et, sagittis ac, posuere eu, lectus. Nam mattis, felis ut adipiscing.'
     # lorem_ipsum_set  = set([i.strip(', .').capitalize() for i in lorem_ipsum.split(' ')])
     
-    users = [f"{faker.first_name()} {faker.last_name()}" for _ in range(NUM_USERS)]
-    # пусть также генерируются имейлы и пароли; если не получится с паролями, то взять лорем ипсум
-    # посмотреть, умеет ли фейкер делать имейлы
-    # юзернеймы (вместо лорем ипсум сет), имейлы и пароли делаем тут через фейкер
+    users = [f"{faker.unique.first_name()} {faker.unique.last_name()}" for _ in range(NUM_USERS)]
+    emails = [f"{faker.email()}" for _ in range(NUM_USERS)]
+    passwords = [f"{faker.password(length=5)}" for _ in range(NUM_USERS)]
 
-    for username in users:
+    for username, email, password in zip(users, emails, passwords):
         cur.execute(
-        '''INSERT INTO users (username) VALUES (?);''', (username, )
+        '''INSERT INTO users (username, email, password) VALUES (?, ?, ?);''', (username, email, password, )
         )
+    
+    # for email in emails:
+    #     cur.execute(
+    #     '''INSERT INTO users (email) VALUES (?);''', (email, )
+    #     )
+    
+    # for password in passwords:
+    #     cur.execute(
+    #     '''INSERT INTO users (password) VALUES (?);''', (password, )
+    #     )
 
-        # emails = [f"{user.replace('.', '')}@example.com" for user in users]
-
-
-
-
-    # использовать фэйкер для генерации юзернеймов, имейлов
-    # взять из функции df_for_chart генерацию юзернеймов, добавить имейлы
-    # посмотреть, чтобы значения были уникальными
     
     """Creating table 'tags'."""
     cur.execute(
