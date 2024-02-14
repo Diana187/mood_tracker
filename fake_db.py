@@ -54,16 +54,6 @@ def setup_database():
         cur.execute(
         '''INSERT INTO users (username, email, password) VALUES (?, ?, ?);''', (username, email, password, )
         )
-    
-    # for email in emails:
-    #     cur.execute(
-    #     '''INSERT INTO users (email) VALUES (?);''', (email, )
-    #     )
-    
-    # for password in passwords:
-    #     cur.execute(
-    #     '''INSERT INTO users (password) VALUES (?);''', (password, )
-    #     )
 
     
     """Creating table 'tags'."""
@@ -130,6 +120,7 @@ def setup_database():
         )
 
     """Creating table 'records_to_tags'."""
+    # чтобы у одной записи могло быть много тегов
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS records_to_tags (
             record_tag_id INTEGER PRIMARY KEY,
