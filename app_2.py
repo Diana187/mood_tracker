@@ -10,7 +10,7 @@ from datetime import datetime as dt
 
 import random
 from faker import Faker
-
+ 
 faker = Faker()
 
 def df_for_chart(num_users=10, count=100):
@@ -128,6 +128,8 @@ def update_graph(selected_tags, selected_name, record_count):
         df = df_for_chart(count=record_count)
     else:
         dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
+# как создать датафрейм из набора строк, из него потом сделать датафрейм
+# 130 строчка становится двумя смысловыми шагами
 
     # df = df_for_chart(count=record_count)
     # dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]

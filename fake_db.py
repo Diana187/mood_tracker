@@ -18,20 +18,20 @@ faker = Faker()
 DATABASE_NAME = 'fake_db.sqlite'
 NUM_USERS = 5
 NUMBER_OF_RECORDS = 10
+NUMBER_OF_RECORDS_TO_TAGS = NUMBER_OF_RECORDS * 3
 
 def create_connection():
     conn = None
     # db_file =  Path().absolute() / Config.DB_FILE
     try:
         conn = sqlite3.connect(DATABASE_NAME)
+        cur = conn.cursor()
     except Error as e:
         print(e)
-    return conn
+    return conn, cur
 
-def setup_database():
-    """Creating a connection and a cursor."""
-    conn = sqlite3.connect(DATABASE_NAME)
-    cur = conn.cursor()
+def setup_database(cur, conn):
+
 
     """Creating table 'fake_db.sqlite'."""
     cur.execute(
@@ -114,7 +114,7 @@ def setup_database():
     for _ in range(NUMBER_OF_RECORDS):
         user_id = random.randint(1, NUM_USERS)
         mood_id = random.randint(1, len(mood_rate))
-        record_date = fake.date_time_between(start_date=start_date, end_date=end_date,  ).strftime('%Y-%m-%d %H:%M:%S')
+        record_date = fake.date_time_between(start_date=start_date, end_date=end_date, ).strftime('%Y-%m-%d %H:%M:%S')
         cur.execute(
             '''INSERT INTO records (user_id, mood_id, record_date) VALUES (?, ?, ?);''', (user_id, mood_id, record_date, )
         )
@@ -131,11 +131,70 @@ def setup_database():
             );'''
     )
 
+    """Заполняем таблицу 'records_to_tags' тестовыми данными."""
+    for _ in range(NUMBER_OF_RECORDS_TO_TAGS):
+        record_id = random.randint(1, NUMBER_OF_RECORDS)
+        tag_id = random.randint(1, len(tags))
+        cur.execute(
+        '''INSERT INTO records_to_tags (record_id, tag_id) VALUES (?, ?);''', (record_id, tag_id, )
+        )
+    
     conn.commit()
-    cur.close()
-    conn.close()
+
+
+def query_database(cur, kwargs):
+# скармливать функции кварги, из них достанем список тегов и имя (в функцию неё приходит словарь)
+# 
+# написать кверю, которая выбирает всё и фильтрует по юзерам и по тегам
+# потому что они будут в одном колбэке, а в нем два контрола: юзер и теги
+# поселектить только нужные столбцы (например, id не нужен для датафрейма)
+# поправить код  
+# объединяю два запроса в один мегазапрос и параметризуем
+
+# открываем апп2 
+
+    """Сreating a query that selects all records for all time for one user, for example, by username"""
+    cur.execute(
+        '''SELECT * FROM users INNER JOIN records on records.user_id = users.user_id
+            WHERE users.username = 'Natalie Johnson'
+            ;'''
+    )
+# параметризовать
+
+# сюда доджоинить юзеров, дописать вхере
+    """Creating a query that selects those records where tags come only from a certain list of tags"""
+    cur.execute(
+        '''SELECT * FROM records
+            INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
+            INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
+            WHERE tags.tag IN ('Walk', 'Psychologist')
+            ;'''
+    )
+    result = cur.fetchall()
+    print(result)
+# параметризовать
+
+
+    # """Creating a query that filters records falling within a certain time interval"""
+    # cur.execute(
+    #     '''SELECT * FROM records
+    #         WHERE record_date BETWEEN '2024-01-10' AND '2024-02-15'
+    #         ;'''
+    # )
+# параметризовать; раскопаем, когда будет слайдер
+
+
+
+    # conn.commit()
+    # cur.close()
+    # conn.close()
 
 
 if __name__ == '__main__':
+    conn, cur = create_connection()
+    # почему не ломается? мы считаем, что это глобальный скоуп!
+    setup_database(cur, conn)
+    query_database()
 
-    setup_database()
+    cur.close()
+    conn.close()
