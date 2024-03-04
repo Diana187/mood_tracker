@@ -142,37 +142,34 @@ def setup_database(cur, conn):
     conn.commit()
 
 
-def query_database(cur, kwargs):
+def query_database(conn, query_params):
 # скармливать функции кварги, из них достанем список тегов и имя (в функцию неё приходит словарь)
 # 
-# написать кверю, которая выбирает всё и фильтрует по юзерам и по тегам
+# написать кверю, которая выбирает times & moods и фильтрует по юзерам и по тегам
 # потому что они будут в одном колбэке, а в нем два контрола: юзер и теги
 # поселектить только нужные столбцы (например, id не нужен для датафрейма)
 # поправить код  
 # объединяю два запроса в один мегазапрос и параметризуем
+# открываем апп2
 
-# открываем апп2 
+# параметризовать теги, но их может быть несколько
 
-    """Сreating a query that selects all records for all time for one user, for example, by username"""
-    cur.execute(
-        '''SELECT * FROM users INNER JOIN records on records.user_id = users.user_id
-            WHERE users.username = 'Natalie Johnson'
-            ;'''
-    )
-# параметризовать
 
-# сюда доджоинить юзеров, дописать вхере
-    """Creating a query that selects those records where tags come only from a certain list of tags"""
-    cur.execute(
-        '''SELECT * FROM records
-            INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
-            INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
-            WHERE tags.tag IN ('Walk', 'Psychologist')
-            ;'''
-    )
+    """"Сreating a megaquery"""
+    sql = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
+        INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
+        INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
+        INNER JOIN users ON records.user_id = users.user_id
+        INNER JOIN moods ON records.mood_id = moods.mood_id
+        WHERE users.username = ?
+        ;'''
+    
+    args = (query_params['name'], ) # сделать с тегами то же самое (посмотреть, какие теги были у Дерека)
+    cur = conn.execute(sql, args)
+
     result = cur.fetchall()
     print(result)
-# параметризовать
+    return result
 
 
     # """Creating a query that filters records falling within a certain time interval"""
@@ -192,9 +189,12 @@ def query_database(cur, kwargs):
 
 if __name__ == '__main__':
     conn, cur = create_connection()
-    # почему не ломается? мы считаем, что это глобальный скоуп!
-    setup_database(cur, conn)
-    query_database()
+    # setup_database(cur, conn)
+    query_params = {
+        'name': 'Derek Carter',
+        'tags': ['foo', 'bar', 'buzz'] # посмотреть, какие теги были у Дерека
+    }
+    query_database(conn, query_params)
 
     cur.close()
     conn.close()
