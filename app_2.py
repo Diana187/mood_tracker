@@ -2,7 +2,7 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
 from datetime import datetime
-from dash import Dash, html, dcc, callback, callback_context, Output, Input, State
+from dash import Dash, html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
@@ -104,6 +104,7 @@ app.layout = dbc.Container([
         ], 
         width=12),
     ]),
+    # html.Button('update dataframe', id='popup-button'),
     dcc.Store(id='df-store'),
 ])
 
@@ -120,23 +121,20 @@ app.layout = dbc.Container([
 
 @callback(
     Output('graph-content', 'figure'),
+    # Output('container-button-basic', 'children'), если у функции 2 аутпута, она должна ретёрнить 2 штуки
+    # поправила на -tag
     [Input('dropdown-selection-tag', 'value'),
-    Input('dropdown-selection-name', 'value'),
-    Input('input_count', 'value')],
+    Input('dropdown-selection-name', 'value')],
     # добавила из Сашиного дока app_2.py
     State('df-store', 'data'),
     prevent_initial_call=True
 )
 
-def update_graph(selected_tags, selected_name, record_count):
+def update_graph(selected_tags, selected_name, graph_data):
 
-    ctx = callback_context
-    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-
-    if button_id == 'input_count':
-        df = df_for_chart(count=record_count)
-    else:
-        dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
+    # сделать датафрейм df в graph_data
+    graph_data
+    dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
 
 # как создать датафрейм из набора строк, из него потом сделать датафрейм
 # https://pynative.com/pandas-create-dataframe-from-list/
@@ -155,6 +153,7 @@ def update_graph(selected_tags, selected_name, record_count):
     Output('dropdown-selection-name', 'value'),
     Output('dropdown-selection-tag', 'options'),
     Output('dropdown-selection-tag', 'value'),
+    # умеет есть только джейсоны
     Output('df-store', 'data'),
     Input('input_count', 'value'),
     suppress_callback_exceptions=True
