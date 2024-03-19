@@ -154,6 +154,15 @@ def query_database(conn, query_params):
 
 # параметризовать теги, но их может быть несколько
 
+# query = 'SELECT foo, bar, spam FROM the_table WHERE item_id IN ({}) ORDER BY item_id ASC'
+# placeholder = '?'
+# placeholders = ', '.join([placeholder for _ in ids])
+# query.format(placeholders)
+# 'SELECT foo, bar, spam FROM the_table WHERE item_id IN (?, ?, ?) ORDER BY item_id ASC'
+
+    placeholder = '?'
+    placeholders = ', '.join([placeholder for _ in query_params['tags']])
+
 
     """"Сreating a megaquery"""
     sql = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
@@ -162,9 +171,13 @@ def query_database(conn, query_params):
         INNER JOIN users ON records.user_id = users.user_id
         INNER JOIN moods ON records.mood_id = moods.mood_id
         WHERE users.username = ?
-        ;'''
-    
-    args = (query_params['name'], ) # сделать с тегами то же самое (посмотреть, какие теги были у Дерека)
+        AND tags.tag IN ({});'''.format(placeholders)
+
+# делаем в 2 шага, потому что методы работают inplace,
+# если делаем так: args = [query_params['name'], ].extend(query_params['tags']), в args будет лежать None
+    args = [query_params['name'], ]
+    args.extend(query_params['tags'])
+    # args = query_params['name'] + sql.format(placeholders)
     cur = conn.execute(sql, args)
 
     result = cur.fetchall()
@@ -192,7 +205,7 @@ if __name__ == '__main__':
     # setup_database(cur, conn)
     query_params = {
         'name': 'Derek Carter',
-        'tags': ['foo', 'bar', 'buzz'] # посмотреть, какие теги были у Дерека
+        'tags': ['Overeating', 'Alcohol', 'Meeting with friends', 'Psychologist', 'Walk']
     }
     query_database(conn, query_params)
 

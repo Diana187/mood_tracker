@@ -110,6 +110,7 @@ app.layout = dbc.Container([
 # опа https://dash.plotly.com/determining-which-callback-input-changed
 # dash.callback_context, но всё равно не совсем понимаю, как именно нужно применить
 
+from io import StringIO
 
 @callback(
     Output('graph-content', 'figure'),
@@ -128,8 +129,10 @@ def update_graph(selected_tags, selected_name, record_count):
         df = df_for_chart(count=record_count)
     else:
         dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
+
 # как создать датафрейм из набора строк, из него потом сделать датафрейм
-# 130 строчка становится двумя смысловыми шагами
+# https://pynative.com/pandas-create-dataframe-from-list/
+# 131 строчка становится двумя смысловыми шагами
 
     # df = df_for_chart(count=record_count)
     # dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
