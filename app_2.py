@@ -83,7 +83,7 @@ app.layout = dbc.Container([
         dbc.Col([
             dbc.Accordion([
                 dbc.AccordionItem(
-                    [dcc.Dropdown(df.names.unique(), df.names.unique()[0], id='dropdown-selection_name'),],
+                    [dcc.Dropdown(df.names.unique(), df.names.unique()[0], id='dropdown-selection-name'),],
                     title='Names',
                 ),
             ]),
@@ -121,7 +121,7 @@ app.layout = dbc.Container([
 @callback(
     Output('graph-content', 'figure'),
     [Input('dropdown-selection', 'value'),
-    Input('dropdown-selection_name', 'value'),
+    Input('dropdown-selection-name', 'value'),
     Input('input_count', 'value')],
     # добавила из Сашиного дока app_2.py
     State('df-store', 'data'),
