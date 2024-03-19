@@ -2,7 +2,7 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
 from datetime import datetime
-from dash import Dash, html, dcc, callback, callback_context, Output, Input
+from dash import Dash, html, dcc, callback, callback_context, Output, Input, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
@@ -28,8 +28,11 @@ def df_for_chart(num_users=10, count=100):
         'times': times
     }
     df = pd.DataFrame(data=d)
+    # добавила из Сашиного дока app_2.py
+    df.sort_values(by='times', inplace=True)
 
     return df
+
     # times = []
     # for i in range(count):
     #     time = faker.date_time_between_dates(
@@ -60,6 +63,9 @@ app = Dash(__name__)
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 default_value = 10
+# добавила из Сашиного дока app_2.py
+initial_df = df_for_chart()
+initial_tags = initial_df.tags.unique().tolist()
 
 app.layout = dbc.Container([
     html.H1(children='Title of Dash App', style={'textAlign':'center'}),
@@ -98,6 +104,7 @@ app.layout = dbc.Container([
         ], 
         width=12),
     ]),
+    dcc.Store(id='df-store'),
 ])
 
 # сейчас df генерирует новые тестовые данные: добавляю тег - данные обновляются
@@ -110,13 +117,14 @@ app.layout = dbc.Container([
 # опа https://dash.plotly.com/determining-which-callback-input-changed
 # dash.callback_context, но всё равно не совсем понимаю, как именно нужно применить
 
-from io import StringIO
 
 @callback(
     Output('graph-content', 'figure'),
     [Input('dropdown-selection', 'value'),
     Input('dropdown-selection_name', 'value'),
     Input('input_count', 'value')],
+    # добавила из Сашиного дока app_2.py
+    State('df-store', 'data'),
     prevent_initial_call=True
 )
 
@@ -140,6 +148,25 @@ def update_graph(selected_tags, selected_name, record_count):
     # dff = df[df.tags.isin(selected_tags) & df.names.isin(selected_names)]
     # dff = df[(df.tags == selected_tag) & (df.names == selected_name)]
     return px.line(dff, x='times', y='moods')
+
+# добавила из Сашиного дока app_2.py
+@callback(
+    Output('dropdown-selection-name', 'options'),
+    Output('dropdown-selection-name', 'value'),
+    Output('dropdown-selection-tag', 'options'),
+    Output('dropdown-selection-tag', 'value'),
+    Output('df-store', 'data'),
+    Input('input_count', 'value'),
+    suppress_callback_exceptions=True
+)
+
+def reset_data(record_count):
+    df = df_for_chart(count=record_count)
+        
+    tags = df.tags.unique().tolist()
+    names = df.names.unique().tolist()
+
+    return names, names[0], tags, tags, df.to_dict('records')
 
 if __name__ == '__main__':
     app.run(debug=True)
