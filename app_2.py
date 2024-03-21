@@ -1,7 +1,6 @@
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
-from datetime import datetime
 from dash import Dash, html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -28,7 +27,6 @@ def df_for_chart(num_users=10, count=100):
         'times': times
     }
     df = pd.DataFrame(data=d)
-    # добавила из Сашиного дока app_2.py
     df.sort_values(by='times', inplace=True)
 
     return df
@@ -63,7 +61,6 @@ app = Dash(__name__)
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 default_value = 10
-# добавила из Сашиного дока app_2.py
 initial_df = df_for_chart()
 initial_tags = initial_df.tags.unique().tolist()
 
@@ -78,8 +75,6 @@ app.layout = dbc.Container([
                 ),
             ]),
         ], width={'size': 6, 'order': 2}),
-        #     dcc.Dropdown(df.tags.unique(), df.tags.unique(), id='dropdown-selection', multi=True),
-        # ], width={'size': 6, 'order': 2}),
         dbc.Col([
             dbc.Accordion([
                 dbc.AccordionItem(
@@ -88,9 +83,6 @@ app.layout = dbc.Container([
                 ),
             ]),
         ], width={'size': 6, 'order': 2}),
-        #     dcc.Dropdown(df.names.unique(), df.names.unique()[0], id='dropdown-selection_name'),
-        # ],
-        # width={'size': 6, 'order': 2}),
     ]),
     dbc.Row([
         dbc.Col([
@@ -113,7 +105,7 @@ app.layout = dbc.Container([
 
 # в функцию update_graph нужно добавить if else блок, где логика будет такой:
 # данные перегенерируются только при изменении значения input_count
-# при изменении в браузере dropdown-selection или dropdown-selection_name, данные остаются без изменений
+# при изменении в браузере dropdown-selection или dropdown-selection-name, данные остаются без изменений
 # как понять, какая штука триггерит обратный вызов?
 # опа https://dash.plotly.com/determining-which-callback-input-changed
 # dash.callback_context, но всё равно не совсем понимаю, как именно нужно применить
@@ -122,23 +114,17 @@ app.layout = dbc.Container([
 @callback(
     Output('graph-content', 'figure'),
     # Output('container-button-basic', 'children'), если у функции 2 аутпута, она должна ретёрнить 2 штуки
-    # поправила на -tag
     [Input('dropdown-selection-tag', 'value'),
     Input('dropdown-selection-name', 'value')],
-    # добавила из Сашиного дока app_2.py
     State('df-store', 'data'),
     prevent_initial_call=True
 )
 
 def update_graph(selected_tags, selected_name, graph_data):
 
-    # сделать датафрейм df в graph_data
-    graph_data
+    # в graph_data у меня лежит список кортежей, делаю из них датафрейм
+    df = pd.DataFrame(graph_data)
     dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
-
-# как создать датафрейм из набора строк, из него потом сделать датафрейм
-# https://pynative.com/pandas-create-dataframe-from-list/
-# 131 строчка становится двумя смысловыми шагами
 
     # df = df_for_chart(count=record_count)
     # dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
@@ -147,13 +133,11 @@ def update_graph(selected_tags, selected_name, graph_data):
     # dff = df[(df.tags == selected_tag) & (df.names == selected_name)]
     return px.line(dff, x='times', y='moods')
 
-# добавила из Сашиного дока app_2.py
 @callback(
     Output('dropdown-selection-name', 'options'),
     Output('dropdown-selection-name', 'value'),
     Output('dropdown-selection-tag', 'options'),
     Output('dropdown-selection-tag', 'value'),
-    # умеет есть только джейсоны
     Output('df-store', 'data'),
     Input('input_count', 'value'),
     suppress_callback_exceptions=True
@@ -169,3 +153,15 @@ def reset_data(record_count):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+# зачем мы делаем df.to_dict('records')? и что вообще это такое, чем он отличается от df?
+
+# to_dict('records') – список словарей
+    
+# превращаем DataFrame df в список словарей,
+# каждый словарь из ключа(название столбца)-значения(строки) – строка в DataFrame
+# Plotly/Dash ест только сериализируемые данные, JSON
+# когда посылаем данные из коллбэка в Dash,
+# используем формат, который можно легко сериализовать
+# 
