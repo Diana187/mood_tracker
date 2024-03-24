@@ -95,16 +95,6 @@ app.layout = dbc.Container([
     ]),
 ])
 
-# сейчас df генерирует новые тестовые данные: добавляю тег - данные обновляются
-# когда меняем теги и имена пусть не генерирует новые данные, а только когда даём новый каунт
-
-# в функцию update_graph нужно добавить if else блок, где логика будет такой:
-# данные перегенерируются только при изменении значения input_count
-# при изменении в браузере dropdown-selection или dropdown-selection-name, данные остаются без изменений
-# как понять, какая штука триггерит обратный вызов?
-# опа https://dash.plotly.com/determining-which-callback-input-changed
-# dash.callback_context, но всё равно не совсем понимаю, как именно нужно применить
-
 @app.callback(
     Output('modal', 'is_open'),
     [Input('popup-button', 'n_clicks'),
