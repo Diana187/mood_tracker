@@ -86,7 +86,7 @@ app.layout = dbc.Container([
                 placeholder='Enter the number of records',
                 value=default_value
             ),
-            html.Button('update dataframe', id='popup-button'),
+            dbc.Button('update dataframe', id='popup-button'),
                 modal,
                 dcc.Store(id='df-store'),
             dcc.Graph(id='graph-content'),
@@ -137,6 +137,7 @@ def reset_data(confirm_clicks, record_count):
 
     # return names, names[0], tags, tags, df.to_dict('records')
     return names, names[0], tags, tags, df.to_dict('list')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
