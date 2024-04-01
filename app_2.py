@@ -7,7 +7,6 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, State, callback, dcc, html
-# from dash.exceptions import PreventUpdate
 from faker import Faker
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -86,12 +85,19 @@ app.layout = dbc.Container([
                 placeholder='Enter the number of records',
                 value=default_value
             ),
+        ], 
+        width={'size': 6, 'order': 2}),
+        dbc.Col([
             dbc.Button('update dataframe', id='popup-button'),
                 modal,
                 dcc.Store(id='df-store'),
-            dcc.Graph(id='graph-content'),
         ], 
-        width=12),
+        width={'size': 6, 'order': 2}),
+    ]),
+    dbc.Row([
+        dbc.Col([
+             dcc.Graph(id='graph-content'),],
+             width=12),
     ]),
 ])
 
