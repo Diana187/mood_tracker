@@ -1,4 +1,5 @@
 import ssl
+import datetime, time
 
 import random
 from datetime import datetime as dt
@@ -21,11 +22,14 @@ def df_for_chart(num_users=10, count=100):
         faker.date_time_between(start_date=dt(2020, 10, 1, 12, 0, 0),
                                 end_date=dt.now(),).strftime('%Y-%m-%d %H:%M:%S') for _ in range(count)
     ]
+    dates_to_unixtime = [int(time.mktime(datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in times]
+
     d = {
         'names': random.choices(users, k=count),
         'moods': random.choices(list(range(-2, 3)), k=count),
         'tags': random.choices(tags, k=count),
-        'times': times
+        'times': times,
+        'unix_dates': dates_to_unixtime,
     }
     df = pd.DataFrame(data=d)
     df.sort_values(by='times', inplace=True)
@@ -93,6 +97,22 @@ app.layout = dbc.Container([
                 dcc.Store(id='df-store'),
         ], 
         width={'size': 6, 'order': 2}),
+    # пытаюсь добавить слайдер
+        dcc.RangeSlider(
+            id='my-dates-range-slider',
+            min=df.unix_dates.unique().tolist()[0],
+            max=df.unix_dates.unique().tolist()[-1],
+            value=(df.unix_dates.unique().tolist()[0], df.unix_dates.unique().tolist()[-1]),
+            step=None,
+            marks={t : 
+                    {"label": str(d.split(' ')[0]), 
+                     "style": {"transform": "rotate(45deg)",
+                                'font_family': 'Arial',
+                                'font_size': '3px',
+                                'text_align': 'center'
+                               }} for t, d  in zip(df['unix_dates'], df['times'])
+            },
+        ),
     ]),
     dbc.Row([
         dbc.Col([
@@ -116,13 +136,18 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
     Output('graph-content', 'figure'),
     [Input('dropdown-selection-tag', 'value'),
     Input('dropdown-selection-name', 'value'),
-    Input('df-store', 'data')],
+    Input('df-store', 'data'),
+    Input('my-dates-range-slider', 'value'),],
     prevent_initial_call=True
 )
-def update_graph(selected_tags, selected_name, graph_data):
+def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     df = pd.DataFrame(graph_data)
-    dff = df[df['tags'].isin(selected_tags) & (df.names == selected_name)]
+    tag_filter = df['tags'].isin(selected_tags)
+    names_filter = df.names == selected_name
+    dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
+
+    dff = df[tag_filter & names_filter & dates_filter]
     return px.line(dff, x='times', y='moods')
 
 @callback(
@@ -131,8 +156,12 @@ def update_graph(selected_tags, selected_name, graph_data):
     Output('dropdown-selection-tag', 'options'),
     Output('dropdown-selection-tag', 'value'),
     Output('df-store', 'data'),
+# добавила аутпут слайдера
+    Output('my-dates-range-slider', 'value'),
+    Output('my-dates-range-slider', 'marks'),
     Input('confirm-button', 'n_clicks'),
     State('input_count', 'value'),
+
     suppress_callback_exceptions=True
 )
 def reset_data(confirm_clicks, record_count):
@@ -141,9 +170,24 @@ def reset_data(confirm_clicks, record_count):
     tags = df.tags.unique().tolist()
     names = df.names.unique().tolist()
 
-    # return names, names[0], tags, tags, df.to_dict('records')
-    return names, names[0], tags, tags, df.to_dict('list')
+    dates = df.unix_dates.unique().tolist()
 
+    marks = {t : 
+                {"label": str(d.split(' ')[0]), 
+                    "style": {"transform": "rotate(45deg)",
+                            'font_family': 'Arial',
+                            'font_size': '3px',
+                            'text_align': 'center'
+                            }} for t, d  in zip(df['unix_dates'], df['times'])
+    }
+
+
+    # dates = (dates[0] <= df['start_utime']) & (df['start_utime'] <= dates[1])
+    # dates = df_fil.start_dt.sort_values().dt.strftime('%Y-%m-%d %H:%M:%S')
+    # dates = dates.unique().tolist()
+
+    # return names, names[0], tags, tags, df.to_dict('records')
+    return names, names[0], tags, tags, df.to_dict('list'), [dates[0], dates[-1]], marks
 
 if __name__ == '__main__':
     app.run(debug=True)
