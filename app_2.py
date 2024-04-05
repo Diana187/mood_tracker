@@ -170,6 +170,11 @@ def reset_data(confirm_clicks, record_count):
     tags = df.tags.unique().tolist()
     names = df.names.unique().tolist()
 
+    # print(repr(df.tags.unique().tolist())) # ['boo', 'bar', 'foo', 'buzz', 'srenk']
+    # print(repr(df.tags.unique())) # array(['boo', 'bar', 'foo', 'buzz', 'srenk'], dtype=object)
+
+    # работает и так, и так
+
     dates = df.unix_dates.unique().tolist()
 
     marks = {t : 
