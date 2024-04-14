@@ -44,7 +44,7 @@ app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 default_value = 10
 initial_df = df_for_chart()
-initial_tags = initial_df.tags.unique().tolist()
+initial_tags = initial_df.tags.unique()
 
 modal = dbc.Modal(
     [
@@ -81,6 +81,7 @@ app.layout = dbc.Container([
             ]),
         ], width={'size': 6, 'order': 2}),
     ]),
+    html.Br(),
     dbc.Row([
         dbc.Col([
             dcc.Input(
@@ -97,7 +98,10 @@ app.layout = dbc.Container([
                 dcc.Store(id='df-store'),
         ], 
         width={'size': 6, 'order': 2}),
-    # пытаюсь добавить слайдер
+    ]),
+    #слайдер положить в div и штуку с кнопкой тоже
+    html.Div([
+        html.Br(),
         dcc.RangeSlider(
             id='my-dates-range-slider',
             min=df.unix_dates.unique().tolist()[0],
@@ -105,15 +109,36 @@ app.layout = dbc.Container([
             value=(df.unix_dates.unique().tolist()[0], df.unix_dates.unique().tolist()[-1]),
             step=None,
             marks={t : 
-                    {"label": str(d.split(' ')[0]), 
-                     "style": {"transform": "rotate(45deg)",
-                                'font_family': 'Arial',
-                                'font_size': '3px',
-                                'text_align': 'center'
-                               }} for t, d  in zip(df['unix_dates'], df['times'])
+                   {"label": str(d.split(' ')[0]), 
+                    "style": {"transform": "rotate(45deg)",
+                              'font_family': 'Arial',
+                              'font_size': '3px',
+                              'text_align': 'center'
+                              }
+                    } for t, d  in zip(df['unix_dates'], df['times'])
             },
         ),
-    ]),
+    ], style={'marginBottom': '1em'}),
+    html.Br(),
+    # dbc.Row([
+    #         html.Br(),
+    #         dcc.RangeSlider(
+    #             id='my-dates-range-slider',
+    #             min=df.unix_dates.unique().tolist()[0],
+    #             max=df.unix_dates.unique().tolist()[-1],
+    #             value=(df.unix_dates.unique().tolist()[0], df.unix_dates.unique().tolist()[-1]),
+    #             step=None,
+    #             marks={t : 
+    #                     {"label": str(d.split(' ')[0]), 
+    #                     "style": {"transform": "rotate(45deg)",
+    #                                 'font_family': 'Arial',
+    #                                 'font_size': '3px',
+    #                                 'text_align': 'center'
+    #                                 }
+    #                     } for t, d  in zip(df['unix_dates'], df['times'])
+    #             },
+    #         ),
+    # ]),
     dbc.Row([
         dbc.Col([
              dcc.Graph(id='graph-content'),],
@@ -134,6 +159,7 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 
 @callback(
     Output('graph-content', 'figure'),
+    Output('dropdown-selection-tag', 'options', allow_duplicate=True),
     [Input('dropdown-selection-tag', 'value'),
     Input('dropdown-selection-name', 'value'),
     Input('df-store', 'data'),
@@ -146,9 +172,15 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     tag_filter = df['tags'].isin(selected_tags)
     names_filter = df.names == selected_name
     dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
+# каждый раз, когда фильтруем на вебе, для данных дфф выбирать имена?, даты и теги
+# все имена должны быть доступны для выбора: имя – главный контрол
+# добавить dropdown в аутпуты (как в резете)
 
     dff = df[tag_filter & names_filter & dates_filter]
-    return px.line(dff, x='times', y='moods')
+    tags = dff.tags.unique()
+# с тегами вот выше! со слайдером будет похоже (может быть нужно будет передавать и доступные и нужные)
+# берём данные из dff и связываем имена и теги с датами
+    return px.line(dff, x='times', y='moods'), tags
 
 @callback(
     Output('dropdown-selection-name', 'options'),
@@ -156,36 +188,34 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     Output('dropdown-selection-tag', 'options'),
     Output('dropdown-selection-tag', 'value'),
     Output('df-store', 'data'),
-# добавила аутпут слайдера
     Output('my-dates-range-slider', 'value'),
     Output('my-dates-range-slider', 'marks'),
     Input('confirm-button', 'n_clicks'),
     State('input_count', 'value'),
-
     suppress_callback_exceptions=True
 )
 def reset_data(confirm_clicks, record_count):
     df = df_for_chart(count=record_count)
 
-    tags = df.tags.unique().tolist()
-    names = df.names.unique().tolist()
+    # tags = df.tags.unique().tolist()
+    tags = df.tags.unique()
+    names = df.names.unique()
 
     # print(repr(df.tags.unique().tolist())) # ['boo', 'bar', 'foo', 'buzz', 'srenk']
     # print(repr(df.tags.unique())) # array(['boo', 'bar', 'foo', 'buzz', 'srenk'], dtype=object)
-
     # работает и так, и так
 
-    dates = df.unix_dates.unique().tolist()
+    dates = df.unix_dates.unique()
 
     marks = {t : 
                 {"label": str(d.split(' ')[0]), 
-                    "style": {"transform": "rotate(45deg)",
+                 "style": {"transform": "rotate(45deg)",
                             'font_family': 'Arial',
                             'font_size': '3px',
                             'text_align': 'center'
-                            }} for t, d  in zip(df['unix_dates'], df['times'])
+                            }
+                } for t, d  in zip(df['unix_dates'], df['times'])
     }
-
 
     # dates = (dates[0] <= df['start_utime']) & (df['start_utime'] <= dates[1])
     # dates = df_fil.start_dt.sort_values().dt.strftime('%Y-%m-%d %H:%M:%S')
