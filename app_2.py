@@ -100,8 +100,8 @@ app.layout = dbc.Container([
         width={'size': 6, 'order': 2}),
     ]),
     #слайдер положить в div и штуку с кнопкой тоже
+    html.Br(),
     html.Div([
-        html.Br(),
         dcc.RangeSlider(
             id='my-dates-range-slider',
             min=df.unix_dates.unique().tolist()[0],
