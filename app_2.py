@@ -99,7 +99,6 @@ app.layout = dbc.Container([
         ], 
         width={'size': 6, 'order': 2}),
     ]),
-    #слайдер положить в div и штуку с кнопкой тоже
     html.Br(),
     html.Div([
         dcc.RangeSlider(
@@ -160,6 +159,8 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 @callback(
     Output('graph-content', 'figure'),
     Output('dropdown-selection-tag', 'options', allow_duplicate=True),
+    Output('my-dates-range-slider', 'value', allow_duplicate=True),
+    Output('my-dates-range-slider', 'marks', allow_duplicate=True),
     [Input('dropdown-selection-tag', 'value'),
     Input('dropdown-selection-name', 'value'),
     Input('df-store', 'data'),
@@ -170,6 +171,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     df = pd.DataFrame(graph_data)
     tag_filter = df['tags'].isin(selected_tags)
+    # нужен ещё какой-то фильтр тегов? 
     names_filter = df.names == selected_name
     dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
 # каждый раз, когда фильтруем на вебе, для данных дфф выбирать имена?, даты и теги
@@ -178,9 +180,20 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     dff = df[tag_filter & names_filter & dates_filter]
     tags = dff.tags.unique()
+
+    dates = dff.unix_dates.unique()
+    marks = {t : 
+                {"label": str(d.split(' ')[0]), 
+                 "style": {"transform": "rotate(45deg)",
+                            'font_family': 'Arial',
+                            'font_size': '3px',
+                            'text_align': 'center'
+                            }
+                } for t, d  in zip(df['unix_dates'], df['times'])
+    }
 # с тегами вот выше! со слайдером будет похоже (может быть нужно будет передавать и доступные и нужные)
 # берём данные из dff и связываем имена и теги с датами
-    return px.line(dff, x='times', y='moods'), tags
+    return px.line(dff, x='times', y='moods'), tags, dates, marks
 
 @callback(
     Output('dropdown-selection-name', 'options'),
