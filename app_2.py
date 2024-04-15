@@ -7,7 +7,7 @@ from datetime import datetime as dt
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
-from dash import Dash, Input, Output, State, callback, dcc, html
+from dash import Dash, Input, Output, State, callback, dcc, html, ctx
 from faker import Faker
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -170,17 +170,29 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     df = pd.DataFrame(graph_data)
+    # print(ctx.triggered_id, 'llalallalla')
     tag_filter = df['tags'].isin(selected_tags)
-    # нужен ещё какой-то фильтр тегов? 
     names_filter = df.names == selected_name
-    dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
-# каждый раз, когда фильтруем на вебе, для данных дфф выбирать имена?, даты и теги
-# все имена должны быть доступны для выбора: имя – главный контрол
-# добавить dropdown в аутпуты (как в резете)
+    
+    if len(dates_slider) == 1:
+        dates_filter = df['unix_dates'] == dates_slider[0]
+    else:
+        dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
 
-    dff = df[tag_filter & names_filter & dates_filter]
-    tags = dff.tags.unique()
 
+    if ctx.triggered_id == 'dropdown-selection-name':
+        dff = df[names_filter]
+    else:
+        dff = df[tag_filter & names_filter & dates_filter]
+
+    dff_names = df[names_filter]
+
+# когда меняем имя, надо фильтровать в первую очередь по нему
+# когда нет данных – https://dash.plotly.com/advanced-callbacks
+
+# опции для дат сделать по аналогии с тегами, должны быть всегда доступны все даты для этого имени
+
+    tags = dff_names.tags.unique()
     dates = dff.unix_dates.unique()
     marks = {t : 
                 {"label": str(d.split(' ')[0]), 
@@ -193,7 +205,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     }
 # с тегами вот выше! со слайдером будет похоже (может быть нужно будет передавать и доступные и нужные)
 # берём данные из dff и связываем имена и теги с датами
-    return px.line(dff, x='times', y='moods'), tags, dates, marks
+    return px.line(dff, x='times', y='moods'), tags, [dates[0], dates[-1]], marks
 
 @callback(
     Output('dropdown-selection-name', 'options'),
