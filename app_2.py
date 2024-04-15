@@ -5,6 +5,7 @@ import random
 from datetime import datetime as dt
 
 import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
 import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, State, callback, dcc, html, ctx
@@ -51,7 +52,7 @@ modal = dbc.Modal(
         dbc.ModalHeader('Confirmation'),
         dbc.ModalBody('Do you want to regenerate the dataframe?'),
         dbc.ModalFooter(
-            dbc.Button('Yes', id='confirm-button')
+        dbc.Button('Yes', id='confirm-button')
         ),
     ],
     id='modal',
@@ -119,25 +120,6 @@ app.layout = dbc.Container([
         ),
     ], style={'marginBottom': '1em'}),
     html.Br(),
-    # dbc.Row([
-    #         html.Br(),
-    #         dcc.RangeSlider(
-    #             id='my-dates-range-slider',
-    #             min=df.unix_dates.unique().tolist()[0],
-    #             max=df.unix_dates.unique().tolist()[-1],
-    #             value=(df.unix_dates.unique().tolist()[0], df.unix_dates.unique().tolist()[-1]),
-    #             step=None,
-    #             marks={t : 
-    #                     {"label": str(d.split(' ')[0]), 
-    #                     "style": {"transform": "rotate(45deg)",
-    #                                 'font_family': 'Arial',
-    #                                 'font_size': '3px',
-    #                                 'text_align': 'center'
-    #                                 }
-    #                     } for t, d  in zip(df['unix_dates'], df['times'])
-    #             },
-    #         ),
-    # ]),
     dbc.Row([
         dbc.Col([
              dcc.Graph(id='graph-content'),],
@@ -159,7 +141,7 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 @callback(
     Output('graph-content', 'figure'),
     Output('dropdown-selection-tag', 'options', allow_duplicate=True),
-    Output('my-dates-range-slider', 'value', allow_duplicate=True),
+    # Output('dropdown-selection-tag', 'value') сделать такое, будет жопа
     Output('my-dates-range-slider', 'marks', allow_duplicate=True),
     [Input('dropdown-selection-tag', 'value'),
     Input('dropdown-selection-name', 'value'),
@@ -170,7 +152,6 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     df = pd.DataFrame(graph_data)
-    # print(ctx.triggered_id, 'llalallalla')
     tag_filter = df['tags'].isin(selected_tags)
     names_filter = df.names == selected_name
     
@@ -187,25 +168,23 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     dff_names = df[names_filter]
 
-# когда меняем имя, надо фильтровать в первую очередь по нему
+    # raise PreventUpdate, как проверить датафрейм пустой или нет
+
 # когда нет данных – https://dash.plotly.com/advanced-callbacks
 
-# опции для дат сделать по аналогии с тегами, должны быть всегда доступны все даты для этого имени
-
     tags = dff_names.tags.unique()
-    dates = dff.unix_dates.unique()
+    # dates = dff_names.unix_dates.unique()
     marks = {t : 
-                {"label": str(d.split(' ')[0]), 
+                {"label": str(d.split(' ')[0]),
                  "style": {"transform": "rotate(45deg)",
                             'font_family': 'Arial',
                             'font_size': '3px',
                             'text_align': 'center'
                             }
-                } for t, d  in zip(df['unix_dates'], df['times'])
+                } for t, d  in zip(dff_names['unix_dates'], dff_names['times'])
     }
-# с тегами вот выше! со слайдером будет похоже (может быть нужно будет передавать и доступные и нужные)
-# берём данные из dff и связываем имена и теги с датами
-    return px.line(dff, x='times', y='moods'), tags, [dates[0], dates[-1]], marks
+
+    return px.line(dff, x='times', y='moods'), tags, marks
 
 @callback(
     Output('dropdown-selection-name', 'options'),
@@ -222,13 +201,8 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 def reset_data(confirm_clicks, record_count):
     df = df_for_chart(count=record_count)
 
-    # tags = df.tags.unique().tolist()
     tags = df.tags.unique()
     names = df.names.unique()
-
-    # print(repr(df.tags.unique().tolist())) # ['boo', 'bar', 'foo', 'buzz', 'srenk']
-    # print(repr(df.tags.unique())) # array(['boo', 'bar', 'foo', 'buzz', 'srenk'], dtype=object)
-    # работает и так, и так
 
     dates = df.unix_dates.unique()
 
@@ -242,11 +216,6 @@ def reset_data(confirm_clicks, record_count):
                 } for t, d  in zip(df['unix_dates'], df['times'])
     }
 
-    # dates = (dates[0] <= df['start_utime']) & (df['start_utime'] <= dates[1])
-    # dates = df_fil.start_dt.sort_values().dt.strftime('%Y-%m-%d %H:%M:%S')
-    # dates = dates.unique().tolist()
-
-    # return names, names[0], tags, tags, df.to_dict('records')
     return names, names[0], tags, tags, df.to_dict('list'), [dates[0], dates[-1]], marks
 
 if __name__ == '__main__':
