@@ -1,5 +1,5 @@
 import ssl
-import datetime, time
+import time
 
 import random
 from datetime import datetime as dt
@@ -23,7 +23,7 @@ def df_for_chart(num_users=10, count=100):
         faker.date_time_between(start_date=dt(2020, 10, 1, 12, 0, 0),
                                 end_date=dt.now(),).strftime('%Y-%m-%d %H:%M:%S') for _ in range(count)
     ]
-    dates_to_unixtime = [int(time.mktime(datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in times]
+    dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in times]
 
     d = {
         'names': random.choices(users, k=count),
@@ -141,7 +141,7 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 @callback(
     Output('graph-content', 'figure'),
     Output('dropdown-selection-tag', 'options', allow_duplicate=True),
-    # Output('dropdown-selection-tag', 'value') сделать такое, будет жопа
+    Output('dropdown-selection-tag', 'value', allow_duplicate=True),
     Output('my-dates-range-slider', 'marks', allow_duplicate=True),
     [Input('dropdown-selection-tag', 'value'),
     Input('dropdown-selection-name', 'value'),
@@ -152,6 +152,7 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     df = pd.DataFrame(graph_data)
+
     tag_filter = df['tags'].isin(selected_tags)
     names_filter = df.names == selected_name
     
@@ -163,16 +164,22 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     if ctx.triggered_id == 'dropdown-selection-name':
         dff = df[names_filter]
+        tags_values = sorted(dff.tags.unique())
+    elif ctx.triggered_id == 'my-dates-range-slider':
+        dff = df[tag_filter & names_filter & dates_filter]
+        dff_tags = df[names_filter & dates_filter]
+        tags_values = sorted(dff_tags.tags.unique())
     else:
         dff = df[tag_filter & names_filter & dates_filter]
+        tags_values = selected_tags
 
     dff_names = df[names_filter]
 
-    # raise PreventUpdate, как проверить датафрейм пустой или нет
 
-# когда нет данных – https://dash.plotly.com/advanced-callbacks
+    if dff.empty:
+        raise PreventUpdate
 
-    tags = dff_names.tags.unique()
+    tags_options = dff_names.tags.unique()
     # dates = dff_names.unix_dates.unique()
     marks = {t : 
                 {"label": str(d.split(' ')[0]),
@@ -184,7 +191,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
                 } for t, d  in zip(dff_names['unix_dates'], dff_names['times'])
     }
 
-    return px.line(dff, x='times', y='moods'), tags, marks
+    return px.line(dff, x='times', y='moods'), tags_options, tags_values, marks
 
 @callback(
     Output('dropdown-selection-name', 'options'),
