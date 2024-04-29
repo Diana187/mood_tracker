@@ -43,7 +43,7 @@ df = df_for_chart(count=1000)
 app = Dash(__name__)
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-default_value = 10
+default_value = 100
 initial_df = df_for_chart()
 initial_tags = initial_df.tags.unique()
 
@@ -143,6 +143,7 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
     Output('dropdown-selection-tag', 'options', allow_duplicate=True),
     Output('dropdown-selection-tag', 'value', allow_duplicate=True),
     Output('my-dates-range-slider', 'marks', allow_duplicate=True),
+    Output('my-dates-range-slider', 'value', allow_duplicate=True),
     [Input('dropdown-selection-tag', 'value'),
     Input('dropdown-selection-name', 'value'),
     Input('df-store', 'data'),
@@ -165,13 +166,17 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     if ctx.triggered_id == 'dropdown-selection-name':
         dff = df[names_filter]
         tags_values = sorted(dff.tags.unique())
+        slider_values = dates_slider
     elif ctx.triggered_id == 'my-dates-range-slider':
         dff = df[tag_filter & names_filter & dates_filter]
         dff_tags = df[names_filter & dates_filter]
         tags_values = sorted(dff_tags.tags.unique())
+        slider_values = dates_slider
     else:
         dff = df[tag_filter & names_filter & dates_filter]
         tags_values = selected_tags
+        slider_values = dates_slider
+        # посмотреть, какой должен быть вэлью, чтобы слайдер реагировал на тэги
 
     dff_names = df[names_filter]
 
@@ -191,7 +196,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
                 } for t, d  in zip(dff_names['unix_dates'], dff_names['times'])
     }
 
-    return px.line(dff, x='times', y='moods'), tags_options, tags_values, marks
+    return px.line(dff, x='times', y='moods'), tags_options, tags_values, marks, slider_values
 
 @callback(
     Output('dropdown-selection-name', 'options'),
