@@ -37,6 +37,7 @@ def df_for_chart(num_users=10, count=100):
 
     return df
 
+#как из базы получать аналог df 
 df = df_for_chart(count=1000)
 
 
@@ -175,8 +176,11 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     else:
         dff = df[tag_filter & names_filter & dates_filter]
         tags_values = selected_tags
-        slider_values = dates_slider
-        # посмотреть, какой должен быть вэлью, чтобы слайдер реагировал на тэги
+        if not tags_values:
+            raise PreventUpdate
+        dff_slider = df[tag_filter & names_filter]
+        slider_values = sorted(dff_slider.unix_dates)
+        slider_values = [slider_values[0], slider_values[-1]]
 
     dff_names = df[names_filter]
 
@@ -185,7 +189,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         raise PreventUpdate
 
     tags_options = dff_names.tags.unique()
-    # dates = dff_names.unix_dates.unique()
+
     marks = {t : 
                 {"label": str(d.split(' ')[0]),
                  "style": {"transform": "rotate(45deg)",

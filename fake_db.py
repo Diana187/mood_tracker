@@ -201,6 +201,7 @@ def query_database(conn, query_params):
 
 
 if __name__ == '__main__':
+    # собрать кишки в одну функцию regenerate_db; вызывать её под ифом и импортировать в ап 2
     conn, cur = create_connection()
     # setup_database(cur, conn)
     query_params = {
