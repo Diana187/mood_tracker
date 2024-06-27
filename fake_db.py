@@ -20,7 +20,11 @@ NUM_USERS = 5
 NUMBER_OF_RECORDS = 10
 NUMBER_OF_RECORDS_TO_TAGS = NUMBER_OF_RECORDS * 3
 
+
 def create_connection():
+
+    """Создаёт соединение с БД, курсок, возвращает их.
+    Если возникает ошибка, выводим её на экран."""
     conn = None
     # db_file =  Path().absolute() / Config.DB_FILE
     try:
@@ -32,8 +36,8 @@ def create_connection():
 
 def setup_database(cur, conn):
 
-
     """Creating table 'fake_db.sqlite'."""
+    """Создаём таблицу 'users', если она не существует."""
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
@@ -50,13 +54,13 @@ def setup_database(cur, conn):
     emails = [f"{faker.email()}" for _ in range(NUM_USERS)]
     passwords = [f"{faker.password(length=5)}" for _ in range(NUM_USERS)]
 
+    # Генерируем фальшивые данные для пользователей
     for username, email, password in zip(users, emails, passwords):
         cur.execute(
         '''INSERT INTO users (username, email, password) VALUES (?, ?, ?);''', (username, email, password, )
         )
 
-    
-    """Creating table 'tags'."""
+    # Creating table 'tags' if not exist
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS tags (
             tag_id INTEGER PRIMARY KEY,
@@ -71,12 +75,13 @@ def setup_database(cur, conn):
     ]
 
     # insert_tags = """INSERT INTO tags (item_id, location_id, volume, price) VALUES (?, ?, ?, ?);"""
+    # Создаём таблицу 'tags' и заполняем её тегами
     for tag in tags:
         cur.execute(
             '''INSERT INTO tags (tag) VALUES (?);''', (tag, )
         )
 
-    """Creating table 'moods'."""
+    # Creating table 'moods'
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS moods (
             mood_id INTEGER PRIMARY KEY,
@@ -91,8 +96,10 @@ def setup_database(cur, conn):
         cur.execute(
             '''INSERT INTO moods (mood_name, mood_rate) VALUES (?, ?);''', (mood, rate, )
         )
+    
+    """Заполняем таблицу 'moods' её различными настроениями и оценками настроения."""
 
-    """Creating table 'records'."""
+    # Creating table 'records'.
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS records (
             record_id INTEGER PRIMARY KEY,
@@ -118,8 +125,10 @@ def setup_database(cur, conn):
         cur.execute(
             '''INSERT INTO records (user_id, mood_id, record_date) VALUES (?, ?, ?);''', (user_id, mood_id, record_date, )
         )
+    
+    #Генерируем случайные записи для таблицы 'records'
 
-    """Creating table 'records_to_tags'."""
+    # Creating table 'records_to_tags'
     # чтобы у одной записи могло быть много тегов
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS records_to_tags (
@@ -138,13 +147,19 @@ def setup_database(cur, conn):
         cur.execute(
         '''INSERT INTO records_to_tags (record_id, tag_id) VALUES (?, ?);''', (record_id, tag_id, )
         )
+
+    """Фиксируем изменения."""
     
     conn.commit()
 
 
 def query_database(conn, query_params):
+
+    """Принимает соединение с базой данных и параметры запроса.
+    Формирует SQL-запрос выборки записей по имени пользователя и тегов."""
+
 # скармливать функции кварги, из них достанем список тегов и имя (в функцию неё приходит словарь)
-# 
+
 # написать кверю, которая выбирает times & moods и фильтрует по юзерам и по тегам
 # потому что они будут в одном колбэке, а в нем два контрола: юзер и теги
 # поселектить только нужные столбцы (например, id не нужен для датафрейма)
@@ -172,6 +187,9 @@ def query_database(conn, query_params):
         INNER JOIN moods ON records.mood_id = moods.mood_id
         WHERE users.username = ?
         AND tags.tag IN ({});'''.format(placeholders)
+    # посмотреть, какие есть колонки в df, убедиться, что мы селектим те же колонки
+    # которые есть в df, если имена отличаются – переименовать, если чего-то нехватает – доселектить
+    # дописать в выражение селект то, чего нехватает
 
 # делаем в 2 шага, потому что методы работают inplace,
 # если делаем так: args = [query_params['name'], ].extend(query_params['tags']), в args будет лежать None
@@ -199,8 +217,15 @@ def query_database(conn, query_params):
     # cur.close()
     # conn.close()
 
+def regenerate_db():
+    conn, cur = create_connection()
+    setup_database(cur, conn)
+    cur.close()
+    conn.close()
+
 
 if __name__ == '__main__':
+    regenerate_db()
     # собрать кишки в одну функцию regenerate_db; вызывать её под ифом и импортировать в ап 2
     conn, cur = create_connection()
     # setup_database(cur, conn)
