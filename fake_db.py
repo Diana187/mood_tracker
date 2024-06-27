@@ -188,6 +188,9 @@ def query_database(conn, query_params):
         WHERE users.username = ?
         AND tags.tag IN ({});'''.format(placeholders)
     # посмотреть, какие есть колонки в df, убедиться, что мы селектим те же колонки
+    #['names', 'moods', 'tags', 'times', 'unix_dates'] в app_2.py
+    # moods, records_to_tags, users, records, tags
+
     # которые есть в df, если имена отличаются – переименовать, если чего-то нехватает – доселектить
     # дописать в выражение селект то, чего нехватает
 
