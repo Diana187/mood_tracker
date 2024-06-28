@@ -43,8 +43,9 @@ def df_for_chart(num_users=10, count=100):
 import sqlite3
 
 def df_for_chart_from_db():
-    # а что мы сюда будем передавать?
-    # здесь надо создать соединение? брать данные и закрывать?  (или отдельной функцией)
+    # а что мы сюда будем передавать? 
+    # здесь надо создать соединение? брать данные и закрывать?  (или отдельной функцией) 
+    # def create_connection(): можно поиипортировать
     con = sqlite3.connect(":fake_db.sqlite:")
     # засунуть query_database, которой мегаквери? query_database(conn, query_params)
     # query_params – у нас name, tags

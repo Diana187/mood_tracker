@@ -180,19 +180,29 @@ def query_database(conn, query_params):
 
 
     """"Сreating a megaquery"""
+    # это полный селект, но тут еще и фильтруем
+    # а нужен полный селект, из которого мы хотим сделать df и его уже фильтровать, мой дф может 
+    # быть результатом селекта
+    # sql = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
+    #     INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
+    #     INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
+    #     INNER JOIN users ON records.user_id = users.user_id
+    #     INNER JOIN moods ON records.mood_id = moods.mood_id
+    #     WHERE users.username = ?
+    #     AND tags.tag IN ({});'''.format(placeholders)
+    
     sql = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
         INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
         INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
         INNER JOIN users ON records.user_id = users.user_id
-        INNER JOIN moods ON records.mood_id = moods.mood_id
-        WHERE users.username = ?
-        AND tags.tag IN ({});'''.format(placeholders)
-    # посмотреть, какие есть колонки в df, убедиться, что мы селектим те же колонки
-    #['names', 'moods', 'tags', 'times', 'unix_dates'] в app_2.py
-    # moods, records_to_tags, users, records, tags
+        INNER JOIN moods ON records.mood_id = moods.mood_id;'''
 
-    # которые есть в df, если имена отличаются – переименовать, если чего-то нехватает – доселектить
-    # дописать в выражение селект то, чего нехватает
+# посмотреть, какие есть колонки в df, убедиться, что мы селектим те же колонки
+#['names', 'moods', 'tags', 'times', 'unix_dates'] в app_2.py
+# moods, records_to_tags, users, records, tags
+
+# которые есть в df, если имена отличаются – переименовать, если чего-то нехватает – доселектить
+# дописать в выражение селект то, чего нехватает
 
 # делаем в 2 шага, потому что методы работают inplace,
 # если делаем так: args = [query_params['name'], ].extend(query_params['tags']), в args будет лежать None
