@@ -41,20 +41,14 @@ def df_for_chart(num_users=10, count=100):
     return df
 
 import sqlite3
-
-def df_for_chart_from_db():
-    # а что мы сюда будем передавать? 
-    # здесь надо создать соединение? брать данные и закрывать?  (или отдельной функцией) 
-    # def create_connection(): можно поиипортировать
-    con = sqlite3.connect(":fake_db.sqlite:")
-    # засунуть query_database, которой мегаквери? query_database(conn, query_params)
-    # query_params – у нас name, tags
-    # датафрейм в df_for_chart у нас создается из словаря, а здесь как делать будем?
-    df = pd.DataFrame(data=)
-    # unix_dates нет, будем их как выше делать?
-    dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in times]
-
-    pass
+from sqlite3 import connect
+from fake_db import query_database
+ 
+def df_for_chart_from_db(sql, conn):
+    conn = connect(':fake_db.sqlite:')
+    sql = query_database()
+    df = pd.read_sql(sql, conn)
+    # dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in times]
     return df
 
 # как из базы получать аналог df
