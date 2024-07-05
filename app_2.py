@@ -15,54 +15,54 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 faker = Faker()
 
-def df_for_chart(num_users=10, count=100):
+# def df_for_chart(num_users=10, count=100):
 
-    users = [f"{faker.first_name()} {faker.last_name()}" for _ in range(num_users)]
-    tags = ['foo', 'bar', 'buzz', 'boo', 'puk', 'srenk']
-    times = [
-        faker.date_time_between(start_date=dt(2020, 10, 1, 12, 0, 0),
-                                end_date=dt.now(),).strftime('%Y-%m-%d %H:%M:%S') for _ in range(count)
-    ]
-    dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in times]
+#     users = [f"{faker.first_name()} {faker.last_name()}" for _ in range(num_users)]
+#     tags = ['foo', 'bar', 'buzz', 'boo', 'puk', 'srenk']
+#     times = [
+#         faker.date_time_between(start_date=dt(2020, 10, 1, 12, 0, 0),
+#                                 end_date=dt.now(),).strftime('%Y-%m-%d %H:%M:%S') for _ in range(count)
+#     ]
+#     dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in times]
 
-    d = {
-        'names': random.choices(users, k=count),
-        'moods': random.choices(list(range(-2, 3)), k=count),
-        'tags': random.choices(tags, k=count),
-        'times': times,
-        'unix_dates': dates_to_unixtime,
-    }
-    df = pd.DataFrame(data=d)
-    df.sort_values(by='times', inplace=True)
+#     d = {
+#         'names': random.choices(users, k=count),
+#         'moods': random.choices(list(range(-2, 3)), k=count),
+#         'tags': random.choices(tags, k=count),
+#         'times': times,
+#         'unix_dates': dates_to_unixtime,
+#     }
+#     df = pd.DataFrame(data=d)
+#     df.sort_values(by='times', inplace=True)
 
-    # column_names = df.columns
-    # print(list(column_names))
+#     # column_names = df.columns
+#     # print(list(column_names))
 
-    return df
+#     return df
 
-import sqlite3
+
 from sqlite3 import connect
-from fake_db import query_database
+from fake_db import query_database, create_connection
  
-def df_for_chart_from_db(sql, conn):
-    conn = connect(':fake_db.sqlite:')
+def df_for_chart_from_db(sql, con):
+    con = create_connection()
+    con_memory = connect(':memory:')
     sql = query_database()
-    df = pd.read_sql(sql, conn)
+    df = pd.read_sql(sql, con)
     # dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in times]
     return df
 
-# как из базы получать аналог df
-# получить датафрейм как вызов функции, которая ходит в базу (fake_db)
-# написать рядом с df_for_chart новую функцию df_for_chart_from_db
-# путь пока не перегенирируется (но если ты придумала –– класс)
-df = df_for_chart(count=1000)
+
+
+
+# df = df_for_chart_from_db()
 
 
 app = Dash(__name__)
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 default_value = 100
-initial_df = df_for_chart()
+initial_df = df_for_chart_from_db()
 initial_tags = initial_df.tags.unique()
 
 modal = dbc.Modal(
@@ -232,7 +232,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     suppress_callback_exceptions=True
 )
 def reset_data(confirm_clicks, record_count):
-    df = df_for_chart(count=record_count)
+    df = df_for_chart_from_db(count=record_count)
 
     tags = df.tags.unique()
     names = df.names.unique()
