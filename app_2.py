@@ -41,15 +41,34 @@ faker = Faker()
 #     return df
 
 
-from sqlite3 import connect
-from fake_db import query_database, create_connection
+import sqlite3
+from sqlite3 import Error
+from database import DATABASE_NAME
+DATABASE_NAME = 'fake_db.sqlite'
+
+# не импортирую create_connection, потому что появилась ошибка
+# AttributeError: 'tuple' object has no attribute 'cursor'
+
  
-def df_for_chart_from_db(sql, con):
-    con = create_connection()
-    con_memory = connect(':memory:')
-    sql = query_database()
-    df = pd.read_sql(sql, con)
-    # dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in times]
+def df_for_chart_from_db():
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+    except Error as e:
+        print(e)
+
+    query = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
+        INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
+        INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
+        INNER JOIN users ON records.user_id = users.user_id
+        INNER JOIN moods ON records.mood_id = moods.mood_id;'''
+
+    df = pd.read_sql(query, conn)
+
+    dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in df['record_date']]
+    df['unix_dates'] = dates_to_unixtime
+    df.sort_values(by='record_date', inplace=True)
+
     return df
 
 
@@ -252,4 +271,6 @@ def reset_data(confirm_clicks, record_count):
     return names, names[0], tags, tags, df.to_dict('list'), [dates[0], dates[-1]], marks
 
 if __name__ == '__main__':
+    df = df_for_chart_from_db()
+    print(df)
     app.run(debug=True)
