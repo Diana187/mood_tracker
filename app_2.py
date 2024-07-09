@@ -64,6 +64,12 @@ def df_for_chart_from_db():
         INNER JOIN moods ON records.mood_id = moods.mood_id;'''
 
     df = pd.read_sql(query, conn)
+    df = df.rename(columns={
+        'record_date': 'times',
+        'username': 'names',
+        'tag': 'tags',
+        'mood_rate': 'moods'
+    }, inplace=True)
 
     dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in df['record_date']]
     df['unix_dates'] = dates_to_unixtime
@@ -74,7 +80,7 @@ def df_for_chart_from_db():
 
 
 
-# df = df_for_chart_from_db()
+df = df_for_chart_from_db()
 
 
 app = Dash(__name__)
