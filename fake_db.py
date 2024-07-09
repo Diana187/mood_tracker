@@ -128,10 +128,9 @@ def setup_database(cur, conn):
             '''INSERT INTO records (user_id, mood_id, record_date) VALUES (?, ?, ?);''', (user_id, mood_id, record_date, )
         )
     
-    #Генерируем случайные записи для таблицы 'records'
-
+    # Generate records for the 'records' table
     # Creating table 'records_to_tags'
-    # чтобы у одной записи могло быть много тегов
+
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS records_to_tags (
             record_tag_id INTEGER PRIMARY KEY,
@@ -151,7 +150,7 @@ def setup_database(cur, conn):
         '''INSERT INTO records_to_tags (record_id, tag_id) VALUES (?, ?);''', (record_id, tag_id, )
         )
 
-# Commit the changes.
+# Commit the changes
     
     conn.commit()
 
@@ -161,33 +160,12 @@ def query_database(conn, query_params):
     """Takes a database connection and query parameters.
     Forms an SQL query to select records by username and tags."""
 
-
-# скормливать функции кварги, из них достанем список тегов и имя (в функцию неё приходит словарь)
-
-# написать кверю, которая выбирает times & moods и фильтрует по юзерам и по тегам
-# потому что они будут в одном колбэке, а в нем два контрола: юзер и теги
-# поселектить только нужные столбцы (например, id не нужен для датафрейма)
-# поправить код  
-# объединяю два запроса в один мегазапрос и параметризуем
-# открываем апп2
-
-# параметризовать теги, но их может быть несколько
-
-# query = 'SELECT foo, bar, spam FROM the_table WHERE item_id IN ({}) ORDER BY item_id ASC'
-# placeholder = '?'
-# placeholders = ', '.join([placeholder for _ in ids])
-# query.format(placeholders)
-# 'SELECT foo, bar, spam FROM the_table WHERE item_id IN (?, ?, ?) ORDER BY item_id ASC'
-
-    placeholder = '?'
-    placeholders = ', '.join([placeholder for _ in query_params['tags']])
-
+    # placeholder = '?'
+    # placeholders = ', '.join([placeholder for _ in query_params['tags']])
 
     # Сreating a megaquery
-    
+
     # это полный селект, но тут еще и фильтруем
-    # а нужен полный селект, из которого мы хотим сделать df и его уже фильтровать, мой дф может 
-    # быть результатом селекта
     # sql = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
     #     INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
     #     INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
@@ -206,8 +184,6 @@ def query_database(conn, query_params):
 #['names', 'moods', 'tags', 'times', 'unix_dates'] в app_2.py
 # moods, records_to_tags, users, records, tags
 
-# которые есть в df, если имена отличаются – переименовать, если чего-то нехватает – доселектить
-# дописать в выражение селект то, чего нехватает
 
 # делаем в 2 шага, потому что методы работают inplace,
 # если делаем так: args = [query_params['name'], ].extend(query_params['tags']), в args будет лежать None
@@ -244,9 +220,7 @@ def regenerate_db():
 
 if __name__ == '__main__':
     regenerate_db()
-    # собрать кишки в одну функцию regenerate_db; вызывать её под ифом и импортировать в ап 2
     conn, cur = create_connection()
-    # setup_database(cur, conn)
     query_params = {
         'name': 'Derek Carter',
         'tags': ['Overeating', 'Alcohol', 'Meeting with friends', 'Psychologist', 'Walk']
