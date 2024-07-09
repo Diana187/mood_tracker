@@ -23,8 +23,9 @@ NUMBER_OF_RECORDS_TO_TAGS = NUMBER_OF_RECORDS * 3
 
 def create_connection():
 
-    """Создаёт соединение с БД, курсок, возвращает их.
-    Если возникает ошибка, выводим её на экран."""
+    """Creates a connection to the database, a cursor, and returns them.
+    If an error occurs, it prints it to the screen."""
+
     conn = None
     # db_file =  Path().absolute() / Config.DB_FILE
     try:
@@ -36,8 +37,8 @@ def create_connection():
 
 def setup_database(cur, conn):
 
-    """Creating table 'fake_db.sqlite'."""
-    """Создаём таблицу 'users', если она не существует."""
+    """Creates table 'fake_db.sqlite', the 'users' table if it does not exist."""
+
     cur.execute(
         '''CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
@@ -97,7 +98,8 @@ def setup_database(cur, conn):
             '''INSERT INTO moods (mood_name, mood_rate) VALUES (?, ?);''', (mood, rate, )
         )
     
-    """Заполняем таблицу 'moods' её различными настроениями и оценками настроения."""
+    """Filling the 'moods' table with various moods and mood ratings."""
+
 
     # Creating table 'records'.
     cur.execute(
@@ -140,7 +142,8 @@ def setup_database(cur, conn):
             );'''
     )
 
-    """Заполняем таблицу 'records_to_tags' тестовыми данными."""
+    """Filling the 'records_to_tags' table with test data."""
+
     for _ in range(NUMBER_OF_RECORDS_TO_TAGS):
         record_id = random.randint(1, NUMBER_OF_RECORDS)
         tag_id = random.randint(1, len(tags))
@@ -148,15 +151,16 @@ def setup_database(cur, conn):
         '''INSERT INTO records_to_tags (record_id, tag_id) VALUES (?, ?);''', (record_id, tag_id, )
         )
 
-    """Фиксируем изменения."""
+# Commit the changes.
     
     conn.commit()
 
 
 def query_database(conn, query_params):
 
-    """Принимает соединение с базой данных и параметры запроса.
-    Формирует SQL-запрос выборки записей по имени пользователя и тегов."""
+    """Takes a database connection and query parameters.
+    Forms an SQL query to select records by username and tags."""
+
 
 # скормливать функции кварги, из них достанем список тегов и имя (в функцию неё приходит словарь)
 
@@ -179,7 +183,8 @@ def query_database(conn, query_params):
     placeholders = ', '.join([placeholder for _ in query_params['tags']])
 
 
-    """"Сreating a megaquery"""
+    # Сreating a megaquery
+    
     # это полный селект, но тут еще и фильтруем
     # а нужен полный селект, из которого мы хотим сделать df и его уже фильтровать, мой дф может 
     # быть результатом селекта
