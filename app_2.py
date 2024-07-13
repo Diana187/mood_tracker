@@ -69,11 +69,11 @@ def df_for_chart_from_db():
         'username': 'names',
         'tag': 'tags',
         'mood_rate': 'moods'
-    }, inplace=True)
+    })
 
-    dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in df['record_date']]
+    dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in df['times']]
     df['unix_dates'] = dates_to_unixtime
-    df.sort_values(by='record_date', inplace=True)
+    df.sort_values(by='times', inplace=True)
 
     return df
 
@@ -257,7 +257,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     suppress_callback_exceptions=True
 )
 def reset_data(confirm_clicks, record_count):
-    df = df_for_chart_from_db(count=record_count)
+    df = df_for_chart_from_db()
 
     tags = df.tags.unique()
     names = df.names.unique()

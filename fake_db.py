@@ -155,7 +155,7 @@ def setup_database(cur, conn):
     conn.commit()
 
 
-def query_database(conn, query_params):
+def query_database(conn, query_params=None):
 
     """Takes a database connection and query parameters.
     Forms an SQL query to select records by username and tags."""
@@ -187,10 +187,14 @@ def query_database(conn, query_params):
 
 # делаем в 2 шага, потому что методы работают inplace,
 # если делаем так: args = [query_params['name'], ].extend(query_params['tags']), в args будет лежать None
-    args = [query_params['name'], ]
-    args.extend(query_params['tags'])
+
+    # args = [query_params['name'], ]
+    # args.extend(query_params['tags'])
+
     # args = query_params['name'] + sql.format(placeholders)
-    cur = conn.execute(sql, args)
+
+    # cur = conn.execute(sql, args)
+    cur = conn.execute(sql)
 
     result = cur.fetchall()
     print(result)
@@ -212,6 +216,7 @@ def query_database(conn, query_params):
     # conn.close()
 
 def regenerate_db():
+# как вбросить сюда количество записей
     conn, cur = create_connection()
     setup_database(cur, conn)
     cur.close()
