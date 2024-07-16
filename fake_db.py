@@ -20,6 +20,11 @@ NUM_USERS = 5
 NUMBER_OF_RECORDS = 10
 NUMBER_OF_RECORDS_TO_TAGS = NUMBER_OF_RECORDS * 3
 
+# 5 users
+# 9 tags
+# 5 moods
+# 10 records
+# 30 records_to_tags
 
 def create_connection():
 
@@ -35,7 +40,10 @@ def create_connection():
         print(e)
     return conn, cur
 
-def setup_database(cur, conn):
+def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
+
+# сюда пихнуть record_count, ему тоже дать значение по умолчанию как в регенерейт_дб
+# поменять NUMBER_OF_RECORDS на record_count
 
     """Creates table 'fake_db.sqlite', the 'users' table if it does not exist."""
 
@@ -215,10 +223,12 @@ def query_database(conn, query_params=None):
     # cur.close()
     # conn.close()
 
-def regenerate_db():
-# как вбросить сюда количество записей
+
+
+def regenerate_db(record_count=NUMBER_OF_RECORDS):
+# передам record_count
     conn, cur = create_connection()
-    setup_database(cur, conn)
+    setup_database(cur, conn, record_count)
     cur.close()
     conn.close()
 

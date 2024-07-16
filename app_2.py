@@ -244,6 +244,9 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     return px.line(dff, x='times', y='moods'), tags_options, tags_values, marks, slider_values
 
+
+import fake_db
+
 @callback(
     Output('dropdown-selection-name', 'options'),
     Output('dropdown-selection-name', 'value'),
@@ -258,6 +261,13 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 )
 def reset_data(confirm_clicks, record_count):
     df = df_for_chart_from_db()
+
+# получить record_count из инпута, передать в regenerate_db как параметр
+# 2 шага: пересоздать базу, забрать данные селектом () df_for_chart_from_db
+
+# посмотреть, новая ли база, фильтруется ли, всё ли работает
+
+    fake_db.regenerate_db(record_count)
 
     tags = df.tags.unique()
     names = df.names.unique()
