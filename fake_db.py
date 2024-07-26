@@ -42,9 +42,6 @@ def create_connection():
 
 def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
 
-# сюда пихнуть record_count, ему тоже дать значение по умолчанию как в регенерейт_дб
-# поменять NUMBER_OF_RECORDS на record_count
-
     """Creates table 'fake_db.sqlite', the 'users' table if it does not exist."""
 
     cur.execute(
@@ -63,7 +60,7 @@ def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
     emails = [f"{faker.email()}" for _ in range(NUM_USERS)]
     passwords = [f"{faker.password(length=5)}" for _ in range(NUM_USERS)]
 
-    # Генерируем фальшивые данные для пользователей
+    # Generating fake data for users
     for username, email, password in zip(users, emails, passwords):
         cur.execute(
         '''INSERT INTO users (username, email, password) VALUES (?, ?, ?);''', (username, email, password, )
@@ -128,7 +125,7 @@ def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=90)
 
-    for _ in range(NUMBER_OF_RECORDS):
+    for _ in range(record_count):
         user_id = random.randint(1, NUM_USERS)
         mood_id = random.randint(1, len(mood_rate))
         record_date = fake.date_time_between(start_date=start_date, end_date=end_date, ).strftime('%Y-%m-%d %H:%M:%S')
@@ -152,7 +149,7 @@ def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
     """Filling the 'records_to_tags' table with test data."""
 
     for _ in range(NUMBER_OF_RECORDS_TO_TAGS):
-        record_id = random.randint(1, NUMBER_OF_RECORDS)
+        record_id = random.randint(1, record_count)
         tag_id = random.randint(1, len(tags))
         cur.execute(
         '''INSERT INTO records_to_tags (record_id, tag_id) VALUES (?, ?);''', (record_id, tag_id, )
@@ -168,8 +165,8 @@ def query_database(conn, query_params=None):
     """Takes a database connection and query parameters.
     Forms an SQL query to select records by username and tags."""
 
-    # placeholder = '?'
-    # placeholders = ', '.join([placeholder for _ in query_params['tags']])
+    placeholder = '?'
+    placeholders = ', '.join([placeholder for _ in query_params['tags']])
 
     # Сreating a megaquery
 
@@ -181,6 +178,19 @@ def query_database(conn, query_params=None):
     #     INNER JOIN moods ON records.mood_id = moods.mood_id
     #     WHERE users.username = ?
     #     AND tags.tag IN ({});'''.format(placeholders)
+
+    # тут такой же полный селект + WHERE. нужен ли BETWEEN?
+    sql = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
+        INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
+        INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
+        INNER JOIN users ON records.user_id = users.user_id
+        INNER JOIN moods ON records.mood_id = moods.mood_id
+        WHERE
+            users.username = ?
+            AND
+            records.record_date = ?
+            records.record_date BETWEEN ? AND ?
+        AND tags.tag IN ({});'''.format(placeholders)
     
     sql = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
         INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
@@ -188,9 +198,7 @@ def query_database(conn, query_params=None):
         INNER JOIN users ON records.user_id = users.user_id
         INNER JOIN moods ON records.mood_id = moods.mood_id;'''
 
-# посмотреть, какие есть колонки в df, убедиться, что мы селектим те же колонки
-#['names', 'moods', 'tags', 'times', 'unix_dates'] в app_2.py
-# moods, records_to_tags, users, records, tags
+    
 
 
 # делаем в 2 шага, потому что методы работают inplace,
@@ -223,10 +231,33 @@ def query_database(conn, query_params=None):
     # cur.close()
     # conn.close()
 
+def get_all_tags():
 
+    conn, cur = create_connection()
+    sql_tag = '''SELECT * FROM tags;'''
+    cur.close()
+    conn.close()
+    return sql_tag
+
+import os
 
 def regenerate_db(record_count=NUMBER_OF_RECORDS):
-# передам record_count
+ 
+    filename = DATABASE_NAME
+ 
+    if os.path.exists(filename):
+        os.remove(filename)
+        print(f"File {filename} removed.")
+    else:
+        print(f"File {filename} doesn't exist.")
+    
+    
+    if os.path.exists(filename):
+        print(f"File {filename} created.")
+    
+    
+
+
     conn, cur = create_connection()
     setup_database(cur, conn, record_count)
     cur.close()

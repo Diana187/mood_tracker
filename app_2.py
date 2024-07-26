@@ -46,9 +46,6 @@ from sqlite3 import Error
 from database import DATABASE_NAME
 DATABASE_NAME = 'fake_db.sqlite'
 
-# не импортирую create_connection, потому что появилась ошибка
-# AttributeError: 'tuple' object has no attribute 'cursor'
-
  
 def df_for_chart_from_db():
     conn = None
@@ -195,6 +192,10 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 )
 def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
+    # будет проблема с датами: в каком виде скормить датафрейму дату, чтобы можно было
+    # пофильтровать даты для слайдера (по диапозону)
+    # https://www.sqlitetutorial.net/sqlite-between/
+
     df = pd.DataFrame(graph_data)
 
     tag_filter = df['tags'].isin(selected_tags)
@@ -231,6 +232,9 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         raise PreventUpdate
 
     tags_options = dff_names.tags.unique()
+    # напишем селект, который выбирает все теги SELECT * FROM tags;
+    # в фейк дб написать функцию, которая делает только этот селект и возвращает теги
+    # получаем теги не из датафрейма, а напрямую из базы
 
     marks = {t : 
                 {"label": str(d.split(' ')[0]),
@@ -260,7 +264,6 @@ import fake_db
     suppress_callback_exceptions=True
 )
 def reset_data(confirm_clicks, record_count):
-    df = df_for_chart_from_db()
 
 # получить record_count из инпута, передать в regenerate_db как параметр
 # 2 шага: пересоздать базу, забрать данные селектом () df_for_chart_from_db
@@ -268,10 +271,10 @@ def reset_data(confirm_clicks, record_count):
 # посмотреть, новая ли база, фильтруется ли, всё ли работает
 
     fake_db.regenerate_db(record_count)
+    df = df_for_chart_from_db()
 
     tags = df.tags.unique()
     names = df.names.unique()
-
     dates = df.unix_dates.unique()
 
     marks = {t : 
@@ -288,5 +291,5 @@ def reset_data(confirm_clicks, record_count):
 
 if __name__ == '__main__':
     df = df_for_chart_from_db()
-    print(df)
+    # print(df)
     app.run(debug=True)
