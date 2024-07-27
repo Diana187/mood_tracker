@@ -11,6 +11,8 @@ import plotly.express as px
 from dash import Dash, Input, Output, State, callback, dcc, html, ctx
 from faker import Faker
 
+import fake_db
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 faker = Faker()
@@ -193,17 +195,19 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     # будет проблема с датами: в каком виде скормить датафрейму дату, чтобы можно было
-    # пофильтровать даты для слайдера (по диапозону)
-    # https://www.sqlitetutorial.net/sqlite-between/
+
 
     df = pd.DataFrame(graph_data)
 
     tag_filter = df['tags'].isin(selected_tags)
     names_filter = df.names == selected_name
     
+    # заменить эту штуку ниже 
     if len(dates_slider) == 1:
+         #  вопросик
         dates_filter = df['unix_dates'] == dates_slider[0]
     else:
+         #  битвин
         dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
 
 
@@ -231,10 +235,9 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     if dff.empty:
         raise PreventUpdate
 
-    tags_options = dff_names.tags.unique()
-    # напишем селект, который выбирает все теги SELECT * FROM tags;
-    # в фейк дб написать функцию, которая делает только этот селект и возвращает теги
-    # получаем теги не из датафрейма, а напрямую из базы
+    # tags_options = dff_names.tags.unique() (здесь фильтровано по имени, пока забудем)
+    tags_options = fake_db.get_all_tags()
+
 
     marks = {t : 
                 {"label": str(d.split(' ')[0]),
@@ -248,8 +251,6 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     return px.line(dff, x='times', y='moods'), tags_options, tags_values, marks, slider_values
 
-
-import fake_db
 
 @callback(
     Output('dropdown-selection-name', 'options'),

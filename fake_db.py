@@ -160,6 +160,9 @@ def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
     conn.commit()
 
 
+# написать новую функцию или добавить в эту
+# 1 новый параметр ван_дейт
+
 def query_database(conn, query_params=None):
 
     """Takes a database connection and query parameters.
@@ -179,8 +182,8 @@ def query_database(conn, query_params=None):
     #     WHERE users.username = ?
     #     AND tags.tag IN ({});'''.format(placeholders)
 
-    # тут такой же полный селект + WHERE. нужен ли BETWEEN?
-    sql = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
+    # тут такой же полный селект + WHERE
+    sql_where = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
         INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
         INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
         INNER JOIN users ON records.user_id = users.user_id
@@ -188,18 +191,21 @@ def query_database(conn, query_params=None):
         WHERE
             users.username = ?
             AND
-            records.record_date = ?
             records.record_date BETWEEN ? AND ?
         AND tags.tag IN ({});'''.format(placeholders)
     
-    sql = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
+    #  records.record_date = ? (когда одна дата)
+
+     
+    # этот не фильтруем, он основной, тут просто выбрали всё
+    sql_whole = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
         INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
         INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
         INNER JOIN users ON records.user_id = users.user_id
         INNER JOIN moods ON records.mood_id = moods.mood_id;'''
-
     
-
+    
+    # sql_records = sql_whole + '''SELECT * FROM records WHERE record_date BETWEEN '2024-01-10' AND '2024-02-15';'''
 
 # делаем в 2 шага, потому что методы работают inplace,
 # если делаем так: args = [query_params['name'], ].extend(query_params['tags']), в args будет лежать None
@@ -210,36 +216,29 @@ def query_database(conn, query_params=None):
     # args = query_params['name'] + sql.format(placeholders)
 
     # cur = conn.execute(sql, args)
-    cur = conn.execute(sql)
+    cur = conn.execute(sql_whole)
 
     result = cur.fetchall()
-    print(result)
+
+    # print(result)
     return result
 
-
-    # """Creating a query that filters records falling within a certain time interval"""
-    # cur.execute(
-    #     '''SELECT * FROM records
-    #         WHERE record_date BETWEEN '2024-01-10' AND '2024-02-15'
-    #         ;'''
-    # )
-# параметризовать; раскопаем, когда будет слайдер
-
-
-
-    # conn.commit()
-    # cur.close()
-    # conn.close()
 
 def get_all_tags():
 
     conn, cur = create_connection()
+
+    # это строка
     sql_tag = '''SELECT * FROM tags;'''
+
+    cur = conn.execute(sql_tag)
+    result = cur.fetchall()
+    filtered_result = [elem[1] for elem in result]
     cur.close()
     conn.close()
-    return sql_tag
 
-import os
+    return filtered_result
+
 
 def regenerate_db(record_count=NUMBER_OF_RECORDS):
  
@@ -250,12 +249,6 @@ def regenerate_db(record_count=NUMBER_OF_RECORDS):
         print(f"File {filename} removed.")
     else:
         print(f"File {filename} doesn't exist.")
-    
-    
-    if os.path.exists(filename):
-        print(f"File {filename} created.")
-    
-    
 
 
     conn, cur = create_connection()
