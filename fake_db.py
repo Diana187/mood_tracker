@@ -160,10 +160,8 @@ def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
     conn.commit()
 
 
-# написать новую функцию или добавить в эту
-# 1 новый параметр ван_дейт
 
-def query_database(conn, query_params=None):
+def create_query_string(query_params=None):
 
     """Takes a database connection and query parameters.
     Forms an SQL query to select records by username and tags."""
@@ -182,27 +180,38 @@ def query_database(conn, query_params=None):
     #     WHERE users.username = ?
     #     AND tags.tag IN ({});'''.format(placeholders)
 
-    # тут такой же полный селект + WHERE
-    sql_where = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
+    sql_full = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
         INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
         INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
         INNER JOIN users ON records.user_id = users.user_id
         INNER JOIN moods ON records.mood_id = moods.mood_id
-        WHERE
-            users.username = ?
-            AND
-            records.record_date BETWEEN ? AND ?
-        AND tags.tag IN ({});'''.format(placeholders)
+        WHERE'''
     
-    #  records.record_date = ? (когда одна дата)
+    sql_names = '''users.username = {}'''
 
-     
-    # этот не фильтруем, он основной, тут просто выбрали всё
-    sql_whole = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
-        INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
-        INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
-        INNER JOIN users ON records.user_id = users.user_id
-        INNER JOIN moods ON records.mood_id = moods.mood_id;'''
+    sql_tags = '''tags.tag IN ({})'''
+
+    sql_time = '''records.record_date = ?'''
+
+    sql_times = '''records.record_date BETWEEN ? AND ?'''
+
+
+    # 
+    if query_params.get('selected_name'):
+        result_query = sql_full + sql_names.format(query_params['selected_name'])
+
+    # # тут такой же полный селект + WHERE
+    # sql_where = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
+    #     INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
+    #     INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
+    #     INNER JOIN users ON records.user_id = users.user_id
+    #     INNER JOIN moods ON records.mood_id = moods.mood_id
+    #     WHERE
+    #         users.username = ?
+    #         AND
+    #         records.record_date BETWEEN ? AND ?
+    #     AND tags.tag IN ({});'''.format(placeholders)
+
     
     
     # sql_records = sql_whole + '''SELECT * FROM records WHERE record_date BETWEEN '2024-01-10' AND '2024-02-15';'''
@@ -264,7 +273,7 @@ if __name__ == '__main__':
         'name': 'Derek Carter',
         'tags': ['Overeating', 'Alcohol', 'Meeting with friends', 'Psychologist', 'Walk']
     }
-    query_database(conn, query_params)
+    query_database(conn, query_params, one_date)
 
     cur.close()
     conn.close()

@@ -196,23 +196,35 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     # будет проблема с датами: в каком виде скормить датафрейму дату, чтобы можно было
 
+    kwargs = dict()
+
+    kwargs['selected_tags'] = selected_tags
+    kwargs['selected_name'] = selected_name
+
 
     df = pd.DataFrame(graph_data)
 
-    tag_filter = df['tags'].isin(selected_tags)
-    names_filter = df.names == selected_name
+    # tag_filter = df['tags'].isin(selected_tags)
+    # names_filter = df.names == selected_name
     
-    # заменить эту штуку ниже 
+    # заменить эту штуку ниже
     if len(dates_slider) == 1:
-         #  вопросик
-        dates_filter = df['unix_dates'] == dates_slider[0]
+        kwargs['one_date'] = dates_slider[0]
+        # 1 вопросик
+        # вызов функции из fake_db query_database()
+        # dates_filter = df['unix_dates'] == dates_slider[0]
     else:
          #  битвин
-        dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
+        kwargs['two_dates'] = (dates_slider[0], dates_slider[1])
+        # dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
 
-
+    
     if ctx.triggered_id == 'dropdown-selection-name':
-        dff = df[names_filter]
+        # вместо dff будем вызвывать функцию из fake_db query_database()
+        kwargs = {k:v for (k, v) in kwargs.items() if k=='selected_name'}
+        full_query = fake_db.query_database(kwargs)
+
+        dff = pd.read_sql(full_query, conn)
         tags_values = sorted(dff.tags.unique())
         slider_values = dates_slider
     elif ctx.triggered_id == 'my-dates-range-slider':
