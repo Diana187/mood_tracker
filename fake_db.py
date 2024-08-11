@@ -188,9 +188,9 @@ def create_query_string(kwargs=None):
 
     sql_tags = ''' tags.tag IN ({})'''
 
-    sql_time = ''' records.record_date = ?'''
+    sql_time = ''' records.record_date = {}'''
 
-    sql_times = ''' records.record_date BETWEEN ? AND ?'''
+    sql_times = ''' records.record_date BETWEEN {} AND {}'''
 
     sql_filters = []
 
@@ -208,7 +208,7 @@ def create_query_string(kwargs=None):
         sql_filters.append(sql_time.format(kwargs['one_date']))
     
     if kwargs.get('two_dates'):
-        sql_filters.append(sql_times.format([kwargs['two_dates'][0], kwargs['two_dates'][1]]))
+        sql_filters.append(sql_times.format(*kwargs['two_dates']))
 
     # погонять в консоли, посмотреть мешают ли \n. Если да – посмотреть как хранить     
 
