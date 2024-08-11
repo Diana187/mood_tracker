@@ -161,13 +161,10 @@ def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
 
 
 
-def create_query_string(query_params=None):
+def create_query_string(kwargs=None):
 
     """Takes a database connection and query parameters.
     Forms an SQL query to select records by username and tags."""
-
-    placeholder = '?'
-    placeholders = ', '.join([placeholder for _ in query_params['tags']])
 
     # Сreating a megaquery
 
@@ -187,18 +184,40 @@ def create_query_string(query_params=None):
         INNER JOIN moods ON records.mood_id = moods.mood_id
         WHERE'''
     
-    sql_names = '''users.username = {}'''
+    sql_names = ''' users.username = {}'''
 
-    sql_tags = '''tags.tag IN ({})'''
+    sql_tags = ''' tags.tag IN ({})'''
 
-    sql_time = '''records.record_date = ?'''
+    sql_time = ''' records.record_date = ?'''
 
-    sql_times = '''records.record_date BETWEEN ? AND ?'''
+    sql_times = ''' records.record_date BETWEEN ? AND ?'''
+
+    sql_filters = []
+
+# если берем так: kwargs['selected_name'] и ключа не оказалось – упадем
+# get('selected_name') -- даст нам нан
+    if kwargs.get('selected_name'):
+        sql_filters.append(sql_names.format(kwargs['selected_name']))
+
+    if kwargs.get('tags'):
+        # result_query = sql_full + sql_tags.format(kwargs['selected_tags'])
+        sql_filters.append(sql_tags.format(', '.join(kwargs['tags'])))
+    
+    # one_date ту дэйтс 
+    if kwargs.get('one_date'):
+        pass
+
+    # погонять в консоли, посмотреть мешают ли \n. Если да – посмотреть как хранить     
+
+    result_query = sql_full + ' AND'.join(sql_filters) + ';'
+    
+    return result_query
+
+    # подумать, как тут сделать проверку на 1 дату или диапазон
 
 
-    # 
-    if query_params.get('selected_name'):
-        result_query = sql_full + sql_names.format(query_params['selected_name'])
+    # if kwargs.get('two_dates'):
+    #     result_query = sql_full + sql_times.format()
 
     # # тут такой же полный селект + WHERE
     # sql_where = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
@@ -225,7 +244,7 @@ def create_query_string(query_params=None):
     # args = query_params['name'] + sql.format(placeholders)
 
     # cur = conn.execute(sql, args)
-    cur = conn.execute(sql_whole)
+    cur = conn.execute(sql_full)
 
     result = cur.fetchall()
 
@@ -273,7 +292,7 @@ if __name__ == '__main__':
         'name': 'Derek Carter',
         'tags': ['Overeating', 'Alcohol', 'Meeting with friends', 'Psychologist', 'Walk']
     }
-    query_database(conn, query_params, one_date)
+    # create_query_string(conn, query_params, one_date)
 
     cur.close()
     conn.close()

@@ -211,23 +211,24 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     if len(dates_slider) == 1:
         kwargs['one_date'] = dates_slider[0]
         # 1 вопросик
-        # вызов функции из fake_db query_database()
+        # вызов функции из fake_db create_query_string()
         # dates_filter = df['unix_dates'] == dates_slider[0]
     else:
-         #  битвин
         kwargs['two_dates'] = (dates_slider[0], dates_slider[1])
         # dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
 
     
     if ctx.triggered_id == 'dropdown-selection-name':
-        # вместо dff будем вызвывать функцию из fake_db query_database()
+        # вместо dff будем вызвывать функцию из fake_db create_query_string()
         kwargs = {k:v for (k, v) in kwargs.items() if k=='selected_name'}
-        full_query = fake_db.query_database(kwargs)
+        full_query = fake_db.create_query_string(kwargs)
 
         dff = pd.read_sql(full_query, conn)
         tags_values = sorted(dff.tags.unique())
         slider_values = dates_slider
+
     elif ctx.triggered_id == 'my-dates-range-slider':
+        # тут использую словарь, в котором лежит всё (он у меня уже есть)
         dff = df[tag_filter & names_filter & dates_filter]
         dff_tags = df[names_filter & dates_filter]
         tags_values = sorted(dff_tags.tags.unique())
@@ -237,6 +238,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         tags_values = selected_tags
         if not tags_values:
             raise PreventUpdate
+        # довильтровать датафрейм пандасом
         dff_slider = df[tag_filter & names_filter]
         slider_values = sorted(dff_slider.unix_dates)
         slider_values = [slider_values[0], slider_values[-1]]
