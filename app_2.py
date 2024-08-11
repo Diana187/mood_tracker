@@ -208,14 +208,14 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     # names_filter = df.names == selected_name
     
     # заменить эту штуку ниже
-    if len(dates_slider) == 1:
-        kwargs['one_date'] = dates_slider[0]
-        # 1 вопросик
-        # вызов функции из fake_db create_query_string()
-        # dates_filter = df['unix_dates'] == dates_slider[0]
-    else:
-        kwargs['two_dates'] = (dates_slider[0], dates_slider[1])
-        # dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
+    # if len(dates_slider) == 1:
+    #     kwargs['one_date'] = dates_slider[0]
+    #     # 1 вопросик
+    #     # вызов функции из fake_db create_query_string()
+    #     # dates_filter = df['unix_dates'] == dates_slider[0]
+    # else:
+    #     kwargs['two_dates'] = (dates_slider[0], dates_slider[1])
+    #     # dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
 
     
     if ctx.triggered_id == 'dropdown-selection-name':
