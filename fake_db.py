@@ -212,35 +212,12 @@ def create_query_string(kwargs=None):
 
     # погонять в консоли, посмотреть мешают ли \n. Если да – посмотреть как хранить     
 
-    result_query = sql_full + ' AND'.join(sql_filters) + ';'
+    query = sql_full + ' AND'.join(sql_filters) + ';'
+    result_query = ' '.join(query.split())
     
     return result_query
 
-    # подумать, как тут сделать проверку на 1 дату или диапазон
-
-
-    # if kwargs.get('two_dates'):
-    #     result_query = sql_full + sql_times.format()
-
-    # # тут такой же полный селект + WHERE
-    # sql_where = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
-    #     INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
-    #     INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
-    #     INNER JOIN users ON records.user_id = users.user_id
-    #     INNER JOIN moods ON records.mood_id = moods.mood_id
-    #     WHERE
-    #         users.username = ?
-    #         AND
-    #         records.record_date BETWEEN ? AND ?
-    #     AND tags.tag IN ({});'''.format(placeholders)
-
     
-    
-    # sql_records = sql_whole + '''SELECT * FROM records WHERE record_date BETWEEN '2024-01-10' AND '2024-02-15';'''
-
-# делаем в 2 шага, потому что методы работают inplace,
-# если делаем так: args = [query_params['name'], ].extend(query_params['tags']), в args будет лежать None
-
     # args = [query_params['name'], ]
     # args.extend(query_params['tags'])
 
@@ -251,7 +228,6 @@ def create_query_string(kwargs=None):
 
     result = cur.fetchall()
 
-    # print(result)
     return result
 
 
