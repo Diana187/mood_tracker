@@ -217,7 +217,10 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     #     kwargs['two_dates'] = (dates_slider[0], dates_slider[1])
     #     # dates_filter = (dates_slider[0] <= df['unix_dates']) & (df['unix_dates'] <= dates_slider[1])
 
-    
+    # if ctx.triggered_id == 'dropdown-selection-name':
+    #     dff = df[names_filter]
+    #     tags_values = sorted(dff.tags.unique())
+    #     slider_values = dates_slider
     if ctx.triggered_id == 'dropdown-selection-name':
         # вместо dff будем вызвывать функцию из fake_db create_query_string()
         kwargs = {k:v for (k, v) in kwargs.items() if k=='selected_name'}
@@ -229,10 +232,17 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     elif ctx.triggered_id == 'my-dates-range-slider':
         # тут использую словарь, в котором лежит всё (он у меня уже есть)
-        dff = df[tag_filter & names_filter & dates_filter]
-        dff_tags = df[names_filter & dates_filter]
-        tags_values = sorted(dff_tags.tags.unique())
+        kwargs = {k: v for (k, v) in kwargs.items()}
+        full_query = fake_db.create_query_string(kwargs)
+        
+        dff = pd.read_sql(full_query, conn)
+        tags_values = sorted(dff.tags.unique())
         slider_values = dates_slider
+        
+        # dff = df[tag_filter & names_filter & dates_filter]
+        # dff_tags = df[names_filter & dates_filter]
+        # tags_values = sorted(dff_tags.tags.unique())
+        # slider_values = dates_slider
     else:
         dff = df[tag_filter & names_filter & dates_filter]
         tags_values = selected_tags
