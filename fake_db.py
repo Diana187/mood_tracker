@@ -199,17 +199,16 @@ def create_query_string(kwargs=None):
     if kwargs.get('selected_name'):
         sql_filters.append(sql_names.format(kwargs['selected_name']))
 
-    if kwargs.get('tags'):
+    if kwargs.get('selected_tags'):
         # result_query = sql_full + sql_tags.format(kwargs['selected_tags'])
-        sql_filters.append(sql_tags.format(', '.join(kwargs['tags'])))
+        sql_filters.append(sql_tags.format(', '.join(kwargs['selected_tags'])))
     
-    # one_date ту дэйтс 
-    if kwargs.get('one_date'):
-        sql_filters.append(sql_time.format(kwargs['one_date']))
+    if kwargs.get('dates'):
+        if isinstance(kwargs['dates'], str):
+            sql_filters.append(sql_time.format(kwargs['dates']))
+        else:
+            sql_filters.append(sql_times.format(*kwargs['dates']))
     
-    if kwargs.get('two_dates'):
-        sql_filters.append(sql_times.format(*kwargs['two_dates']))
-
     # погонять в консоли, посмотреть мешают ли \n. Если да – посмотреть как хранить     
 
     query = sql_full + ' AND'.join(sql_filters) + ';'
