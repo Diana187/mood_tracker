@@ -205,7 +205,10 @@ def create_query_string(kwargs=None):
     
     # one_date ту дэйтс 
     if kwargs.get('one_date'):
-        pass
+        sql_filters.append(sql_time.format(kwargs['one_date']))
+    
+    if kwargs.get('two_dates'):
+        sql_filters.append(sql_times.format([kwargs['two_dates'][0], kwargs['two_dates'][1]]))
 
     # погонять в консоли, посмотреть мешают ли \n. Если да – посмотреть как хранить     
 
