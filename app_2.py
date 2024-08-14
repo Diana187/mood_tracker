@@ -203,7 +203,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     kwargs['dates'] = dates_slider
 
     conn, cur = fake_db.create_connection()
-
+    
     df = pd.DataFrame(graph_data)
 
     # tag_filter = df['tags'].isin(selected_tags)
@@ -223,15 +223,14 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         slider_values = dates_slider
 
     elif ctx.triggered_id == 'my-dates-range-slider':
+        no_tag_kwargs = {k:v for (k, v) in kwargs.items() if k !='selected_tags'}
+        query_for_tags = fake_db.create_query_string(no_tag_kwargs)
         full_query = fake_db.create_query_string(kwargs)
-        dff = pd.read_sql(full_query, conn)
-        # из словаря оставляем только то, что НЕ теги
-        # ещё их словаря можно удалять items, можно удалить k v тегов
-        tags_kwargs = {}
-        # и дальше переделать
-        tags_values = sorted(dff.tags.unique())
 
-        
+        dff = pd.read_sql(full_query, conn)
+
+        dff_tags = pd.read_sql(query_for_tags, conn)
+        tags_values = sorted(dff_tags.tags.unique())
         slider_values = dates_slider
         
         # dff = df[tag_filter & names_filter & dates_filter]
@@ -239,14 +238,28 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         # tags_values = sorted(dff_tags.tags.unique())
         # slider_values = dates_slider
     else:
-        dff = df[tag_filter & names_filter & dates_filter]
+        full_query = fake_db.create_query_string(kwargs)
         tags_values = selected_tags
+        dff = pd.read_sql(full_query, conn)
+
         if not tags_values:
             raise PreventUpdate
-        # довильтровать датафрейм пандасом
-        dff_slider = df[tag_filter & names_filter]
+        
+        no_dates_kwargs = {k:v for (k, v) in kwargs.items() if k !='dates'}
+        query_for_dates = fake_db.create_query_string(no_dates_kwargs)
+        dff_slider = pd.read_sql(query_for_dates, conn)
         slider_values = sorted(dff_slider.unix_dates)
         slider_values = [slider_values[0], slider_values[-1]]
+
+        # dff = df[tag_filter & names_filter & dates_filter]
+        # tags_values = selected_tags
+        # if not tags_values:
+        #     raise PreventUpdate
+        # # довильтровать датафрейм пандасом
+        # dff_slider = df[tag_filter & names_filter]
+        # slider_values = sorted(dff_slider.unix_dates)
+        # slider_values = [slider_values[0], slider_values[-1]]
+
 
     dff_names = df[names_filter]
 

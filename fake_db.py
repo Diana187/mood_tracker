@@ -184,7 +184,7 @@ def create_query_string(kwargs=None):
         INNER JOIN moods ON records.mood_id = moods.mood_id
         WHERE'''
     
-    sql_names = ''' users.username = {}'''
+    sql_names = ''' users.username = '{}' '''
 
     sql_tags = ''' tags.tag IN ({})'''
 
