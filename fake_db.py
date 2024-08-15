@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import time
 import random
 from datetime import datetime, timedelta
 
@@ -108,6 +109,7 @@ def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
             mood_description TEXT,
             activity TEXT,
             record_date DATETIME,
+            unix_time INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(user_id),
             FOREIGN KEY (mood_id) REFERENCES moods(mood_id)
             );'''
@@ -122,8 +124,9 @@ def setup_database(cur, conn, record_count=NUMBER_OF_RECORDS):
         user_id = random.randint(1, NUM_USERS)
         mood_id = random.randint(1, len(mood_rate))
         record_date = fake.date_time_between(start_date=start_date, end_date=end_date, ).strftime('%Y-%m-%d %H:%M:%S')
+        unix_time = int(time.mktime(datetime.strptime(record_date, '%Y-%m-%d %H:%M:%S').timetuple()))
         cur.execute(
-            '''INSERT INTO records (user_id, mood_id, record_date) VALUES (?, ?, ?);''', (user_id, mood_id, record_date, )
+            '''INSERT INTO records (user_id, mood_id, record_date, unix_time) VALUES (?, ?, ?, ?);''', (user_id, mood_id, record_date, unix_time)
         )
     
     # Generate records for the 'records' table
@@ -170,7 +173,7 @@ def create_query_string(kwargs=None):
     #     WHERE users.username = ?
     #     AND tags.tag IN ({});'''.format(placeholders)
 
-    sql_full = '''SELECT records.record_date, users.username, tags.tag, moods.mood_rate FROM records
+    sql_full = '''SELECT records.record_date, records.unix_time, users.username, tags.tag, moods.mood_rate FROM records
         INNER JOIN records_to_tags ON records.record_id = records_to_tags.record_id
         INNER JOIN tags ON records_to_tags.tag_id = tags.tag_id
         INNER JOIN users ON records.user_id = users.user_id
@@ -181,9 +184,9 @@ def create_query_string(kwargs=None):
 
     sql_tags = ''' tags.tag IN ({})'''
 
-    sql_time = ''' records.record_date = {}'''
+    sql_time = ''' records.unix_time = {}'''
 
-    sql_times = ''' records.record_date BETWEEN {} AND {}'''
+    sql_times = ''' records.unix_time BETWEEN {} AND {}'''
 
     sql_filters = []
 
@@ -192,7 +195,7 @@ def create_query_string(kwargs=None):
 
     if kwargs.get('selected_tags'):
         # result_query = sql_full + sql_tags.format(kwargs['selected_tags'])
-        sql_filters.append(sql_tags.format(', '.join(kwargs['selected_tags'])))
+        sql_filters.append(sql_tags.format(', '.join(["'" + tag + "'"  for tag in kwargs['selected_tags']])))
     
     if kwargs.get('dates'):
         if isinstance(kwargs['dates'], str):

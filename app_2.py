@@ -204,7 +204,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     conn, cur = fake_db.create_connection()
     
-    df = pd.DataFrame(graph_data)
+    # df = pd.DataFrame(graph_data)
 
     # tag_filter = df['tags'].isin(selected_tags)
     # names_filter = df.names == selected_name
@@ -238,6 +238,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         # slider_values = dates_slider
     else:
         full_query = fake_db.create_query_string(kwargs)
+
         tags_values = selected_tags
         dff = pd.read_sql(full_query, conn)
 
@@ -246,6 +247,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         
         no_dates_kwargs = {k:v for (k, v) in kwargs.items() if k !='dates'}
         query_for_dates = fake_db.create_query_string(no_dates_kwargs)
+
         dff_slider = pd.read_sql(query_for_dates, conn)
         slider_values = sorted(dff_slider.unix_dates)
         slider_values = [slider_values[0], slider_values[-1]]
@@ -274,7 +276,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
     marks = {t : 
                 {"label": str(d.split(' ')[0]),
-                 "style": {"transform": "rotate(45deg)",
+                 "style": {'transform': 'rotate(45deg)',
                             'font_family': 'Arial',
                             'font_size': '3px',
                             'text_align': 'center'
@@ -290,6 +292,8 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     Output('dropdown-selection-name', 'value'),
     Output('dropdown-selection-tag', 'options'),
     Output('dropdown-selection-tag', 'value'),
+# через него передавали данные датафрейма (сохраняли их) и запускали колбэк, надо попробовать его убрать, удачи!
+# для передачи данных сейчас не надо, если его удалить: будет ли работать колбэк (перерисовка графика по кнопке)
     Output('df-store', 'data'),
     Output('my-dates-range-slider', 'value'),
     Output('my-dates-range-slider', 'marks'),
@@ -325,5 +329,4 @@ def reset_data(confirm_clicks, record_count):
 
 if __name__ == '__main__':
     df = df_for_chart_from_db()
-    # print(df)
     app.run(debug=True)
