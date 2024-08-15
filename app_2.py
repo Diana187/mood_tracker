@@ -214,7 +214,6 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     #     tags_values = sorted(dff.tags.unique())
     #     slider_values = dates_slider
     if ctx.triggered_id == 'dropdown-selection-name':
-        # вместо dff будем вызвывать функцию из fake_db create_query_string()
         kwargs = {k:v for (k, v) in kwargs.items() if k=='selected_name'}
         full_query = fake_db.create_query_string(kwargs)
 
@@ -260,8 +259,10 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         # slider_values = sorted(dff_slider.unix_dates)
         # slider_values = [slider_values[0], slider_values[-1]]
 
-
-    dff_names = df[names_filter]
+    no_name_kwargs = {k:v for (k, v) in kwargs.items() if k != 'selected_name'}
+    query_for_names = fake_db.create_query_string(no_name_kwargs)
+    dff_names = pd.read_sql(query_for_names, conn)
+    # dff_names = df[names_filter]
 
 
     if dff.empty:

@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from sqlite3 import Error
 
 from database import DATABASE_NAME
-import create_database as db_creator
 
 import pandas as pd
 import random
@@ -19,12 +18,6 @@ DATABASE_NAME = 'fake_db.sqlite'
 NUM_USERS = 5
 NUMBER_OF_RECORDS = 10
 NUMBER_OF_RECORDS_TO_TAGS = NUMBER_OF_RECORDS * 3
-
-# 5 users
-# 9 tags
-# 5 moods
-# 10 records
-# 30 records_to_tags
 
 def create_connection():
 
@@ -194,8 +187,6 @@ def create_query_string(kwargs=None):
 
     sql_filters = []
 
-# если берем так: kwargs['selected_name'] и ключа не оказалось – упадем
-# get('selected_name') -- даст нам нан
     if kwargs.get('selected_name'):
         sql_filters.append(sql_names.format(kwargs['selected_name']))
 
@@ -208,8 +199,7 @@ def create_query_string(kwargs=None):
             sql_filters.append(sql_time.format(kwargs['dates']))
         else:
             sql_filters.append(sql_times.format(*kwargs['dates']))
-    
-    # погонять в консоли, посмотреть мешают ли \n. Если да – посмотреть как хранить     
+      
 
     query = sql_full + ' AND'.join(sql_filters) + ';'
     result_query = ' '.join(query.split())
@@ -234,7 +224,6 @@ def get_all_tags():
 
     conn, cur = create_connection()
 
-    # это строка
     sql_tag = '''SELECT * FROM tags;'''
 
     cur = conn.execute(sql_tag)
