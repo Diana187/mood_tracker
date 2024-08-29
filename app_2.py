@@ -19,7 +19,7 @@ faker = Faker()
 
 # def df_for_chart(num_users=10, count=100):
 
-#     users = [f"{faker.first_name()} {faker.last_name()}" for _ in range(num_users)]
+#     users = [f"t_name()} {faker.last_name()}"" for _ in range(num_users)]
 #     tags = ['foo', 'bar', 'buzz', 'boo', 'puk', 'srenk']
 #     times = [
 #         faker.date_time_between(start_date=dt(2020, 10, 1, 12, 0, 0),
@@ -151,8 +151,8 @@ app.layout = dbc.Container([
             value=(df.unix_dates.unique().tolist()[0], df.unix_dates.unique().tolist()[-1]),
             step=None,
             marks={t : 
-                   {"label": str(d.split(' ')[0]), 
-                    "style": {"transform": "rotate(45deg)",
+                   {'label': str(d.split(' ')[0]), 
+                    'style': {'transform': 'rotate(45deg)',
                               'font_family': 'Arial',
                               'font_size': '3px',
                               'text_align': 'center'
@@ -275,8 +275,8 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
 
     marks = {t : 
-                {"label": str(d.split(' ')[0]),
-                 "style": {'transform': 'rotate(45deg)',
+                {'label': str(d.split(' ')[0]),
+                 'style': {'transform': 'rotate(45deg)',
                             'font_family': 'Arial',
                             'font_size': '3px',
                             'text_align': 'center'
@@ -316,8 +316,8 @@ def reset_data(confirm_clicks, record_count):
     dates = df.unix_dates.unique()
 
     marks = {t : 
-                {"label": str(d.split(' ')[0]), 
-                 "style": {"transform": "rotate(45deg)",
+                {'label': str(d.split(' ')[0]), 
+                 'style': {'transform': 'rotate(45deg)',
                             'font_family': 'Arial',
                             'font_size': '3px',
                             'text_align': 'center'
