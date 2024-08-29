@@ -1,7 +1,6 @@
 import ssl
 import time
 
-import random
 from datetime import datetime as dt
 
 import dash_bootstrap_components as dbc
@@ -48,7 +47,17 @@ from sqlite3 import Error
 from database import DATABASE_NAME
 DATABASE_NAME = 'fake_db.sqlite'
 
- 
+
+def df_rename(df):
+    df = df.rename(columns={
+        'record_date': 'times',
+        'username': 'names',
+        'tag': 'tags',
+        'mood_rate': 'moods'
+    })
+    return df
+
+
 def df_for_chart_from_db():
     conn = None
     try:
@@ -63,12 +72,7 @@ def df_for_chart_from_db():
         INNER JOIN moods ON records.mood_id = moods.mood_id;'''
 
     df = pd.read_sql(query, conn)
-    df = df.rename(columns={
-        'record_date': 'times',
-        'username': 'names',
-        'tag': 'tags',
-        'mood_rate': 'moods'
-    })
+    df = df_rename(df)
 
     dates_to_unixtime = [int(time.mktime(dt.strptime(s, '%Y-%m-%d %H:%M:%S').timetuple())) for s in df['times']]
     df['unix_dates'] = dates_to_unixtime
@@ -80,6 +84,9 @@ def df_for_chart_from_db():
 
 
 df = df_for_chart_from_db()
+# print(df.head())
+# print(df.columns)
+
 
 
 app = Dash(__name__)
@@ -203,6 +210,8 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     kwargs['dates'] = dates_slider
 
     conn, cur = fake_db.create_connection()
+
+    print(selected_tags)
     
     # df = pd.DataFrame(graph_data)
 
@@ -217,7 +226,9 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         kwargs = {k:v for (k, v) in kwargs.items() if k=='selected_name'}
         full_query = fake_db.create_query_string(kwargs)
 
+
         dff = pd.read_sql(full_query, conn)
+        dff = df_rename(dff)
         tags_values = sorted(dff.tags.unique())
         slider_values = dates_slider
 
@@ -227,6 +238,7 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         full_query = fake_db.create_query_string(kwargs)
 
         dff = pd.read_sql(full_query, conn)
+        dff = df_rename(dff)
 
         dff_tags = pd.read_sql(query_for_tags, conn)
         tags_values = sorted(dff_tags.tags.unique())
@@ -241,14 +253,17 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
         tags_values = selected_tags
         dff = pd.read_sql(full_query, conn)
+        dff = df_rename(dff)
 
         if not tags_values:
             raise PreventUpdate
         
         no_dates_kwargs = {k:v for (k, v) in kwargs.items() if k !='dates'}
         query_for_dates = fake_db.create_query_string(no_dates_kwargs)
-
         dff_slider = pd.read_sql(query_for_dates, conn)
+        dff_slider = dff_slider.rename(columns={
+        'unix_time': 'unix_dates'
+        })
         slider_values = sorted(dff_slider.unix_dates)
         slider_values = [slider_values[0], slider_values[-1]]
 
@@ -262,6 +277,10 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
         # slider_values = [slider_values[0], slider_values[-1]]
 
     no_name_kwargs = {k:v for (k, v) in kwargs.items() if k != 'selected_name'}
+
+    if not no_name_kwargs:
+        raise PreventUpdate
+
     query_for_names = fake_db.create_query_string(no_name_kwargs)
     dff_names = pd.read_sql(query_for_names, conn)
     # dff_names = df[names_filter]
@@ -273,7 +292,9 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     # tags_options = dff_names.tags.unique() (здесь фильтровано по имени, пока забудем)
     tags_options = fake_db.get_all_tags()
 
-
+    dff_names = dff_names.rename(columns={
+        'unix_time': 'unix_dates'
+        })
     marks = {t : 
                 {'label': str(d.split(' ')[0]),
                  'style': {'transform': 'rotate(45deg)',
@@ -310,6 +331,9 @@ def reset_data(confirm_clicks, record_count):
 
     fake_db.regenerate_db(record_count)
     df = df_for_chart_from_db()
+
+    # if not confirm_clicks:
+    #     raise PreventUpdate
 
     tags = df.tags.unique()
     names = df.names.unique()
