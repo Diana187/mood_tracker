@@ -201,8 +201,6 @@ def toggle_modal(popup_clicks, confirm_clicks, is_open):
 )
 def update_graph(selected_tags, selected_name, graph_data, dates_slider):
 
-    # будет проблема с датами: в каком виде скормить датафрейму дату, чтобы можно было
-
     kwargs = dict()
 
     kwargs['selected_tags'] = selected_tags
@@ -210,8 +208,6 @@ def update_graph(selected_tags, selected_name, graph_data, dates_slider):
     kwargs['dates'] = dates_slider
 
     conn, cur = fake_db.create_connection()
-
-    print(selected_tags)
     
     # df = pd.DataFrame(graph_data)
 
